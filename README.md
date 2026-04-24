@@ -1,5 +1,12 @@
 # pc-control
 
+[![CI](https://github.com/Matiasxth/pc-control/actions/workflows/ci.yml/badge.svg)](https://github.com/Matiasxth/pc-control/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)](pyproject.toml)
+[![Platform](https://img.shields.io/badge/platform-windows-blue)](README.md#requirements)
+[![Release](https://img.shields.io/github/v/release/Matiasxth/pc-control?include_prereleases&sort=semver)](https://github.com/Matiasxth/pc-control/releases)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+
 Python CLI toolkit to fully control a Windows PC — screen, input, windows, browser, desktop apps, vision, OCR, messaging, and workflows.
 
 Built for AI agents that need a single, JSON-out-first interface to drive a real machine.
