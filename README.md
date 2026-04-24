@@ -97,4 +97,4 @@ MIT — see [LICENSE](LICENSE).
 
 ## Status
 
-Early-stage but usable. Contributions welcome — see open issues.
+Early-stage but usable. Contributions welcome — start with [CONTRIBUTING.md](CONTRIBUTING.md) and the open issues.
