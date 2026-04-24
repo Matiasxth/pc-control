@@ -1,21 +1,28 @@
 """OCR module — Windows.Media.Ocr via Python WinRT bindings."""
 
+from __future__ import annotations
+
 import asyncio
 import io
 import json
 import sys
+from argparse import Namespace
 from pathlib import Path
 
 if sys.stdout.encoding != "utf-8":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 
-def _output(data: dict):
+def _output(data: dict) -> None:
     print(json.dumps(data, ensure_ascii=False))
 
 
 async def _ocr_async(image_path: str, language: str = "es") -> str:
-    """Run Windows OCR on an image file."""
+    """Run Windows.Media.Ocr on `image_path` and return the recognized text.
+
+    Tries the requested `language` first, falls back to the user's profile
+    languages, and raises `RuntimeError` when neither yields an engine.
+    """
     from winrt.windows.globalization import Language
     from winrt.windows.graphics.imaging import BitmapDecoder
     from winrt.windows.media.ocr import OcrEngine
@@ -39,8 +46,8 @@ async def _ocr_async(image_path: str, language: str = "es") -> str:
     return result.text
 
 
-def ocr_file(image_path, language="es"):
-    """Run OCR on an image file."""
+def ocr_file(image_path: str, language: str = "es") -> None:
+    """Run OCR on an image file and emit the recognized text on stdout."""
     path = Path(image_path)
     if not path.exists():
         _output({"status": "error", "error": f"File not found: {image_path}"})
@@ -61,8 +68,17 @@ def ocr_file(image_path, language="es"):
         _output({"status": "error", "error": str(e)})
 
 
-def ocr_screen(region=None, window=None, language="es"):
-    """Take a screenshot and run OCR on it."""
+def ocr_screen(
+    region: str | None = None,
+    window: str | None = None,
+    language: str = "es",
+) -> None:
+    """Capture a screenshot (full / region / window) then OCR it.
+
+    The screenshot is captured via `pc_control.screen.capture.screenshot`
+    with stdout redirected so its JSON output doesn't leak into this
+    command's response — the final response comes from `ocr_file`.
+    """
     from pc_control.screen.capture import screenshot
 
     old_stdout = sys.stdout
@@ -84,8 +100,8 @@ def ocr_screen(region=None, window=None, language="es"):
     ocr_file(image_path, language=language)
 
 
-def handle_command(args):
-    """Handle OCR subcommands."""
+def handle_command(args: Namespace) -> None:
+    """Dispatch `ocr <subcommand>` to `ocr_file` or `ocr_screen`."""
     cmd = args.ocr_command
     if cmd == "file":
         ocr_file(args.path, language=getattr(args, "lang", "es"))

@@ -1,4 +1,6 @@
-"""Template matching — find an image/icon on screen."""
+"""Template matching — locate an icon or reference image on screen."""
+
+from __future__ import annotations
 
 import io
 import json
@@ -19,18 +21,29 @@ except ImportError:
     HAS_OPENCV = False
 
 
-def _output(data: dict):
+def _output(data: dict) -> None:
     print(json.dumps(data, ensure_ascii=False))
 
 
-def find_image(template_path: str, screenshot_path: str = None, threshold: float = 0.8):
-    """Find a template image on screen."""
+def find_image(
+    template_path: str,
+    screenshot_path: str | None = None,
+    threshold: float = 0.8,
+) -> None:
+    """Find all occurrences of `template_path` on screen (or within a file).
+
+    When `screenshot_path` is omitted, a fresh screenshot is captured via
+    `pc_control.screen.capture.screenshot`. The OpenCV backend is used when
+    available (fast, normalized cross-correlation); otherwise falls back to
+    a pure-PIL NCC implementation that downsamples by 2× for speed.
+
+    `threshold` is the NCC similarity floor in [0, 1]; higher = stricter.
+    """
     tpl_path = Path(template_path)
     if not tpl_path.exists():
         _output({"status": "error", "error": f"Template not found: {template_path}"})
         return
 
-    # Take screenshot if not provided
     if not screenshot_path:
         from pc_control.screen.capture import screenshot
 
@@ -52,8 +65,12 @@ def find_image(template_path: str, screenshot_path: str = None, threshold: float
         _find_pil(str(tpl_path), screenshot_path, threshold)
 
 
-def _find_opencv(template_path: str, screenshot_path: str, threshold: float):
-    """Template matching using OpenCV (fast)."""
+def _find_opencv(template_path: str, screenshot_path: str, threshold: float) -> None:
+    """OpenCV `matchTemplate` with `TM_CCOEFF_NORMED` — fast path.
+
+    Matches within 10 pixels of each other are deduplicated and the top 20
+    (by confidence) are returned.
+    """
     screen = cv2.imread(screenshot_path, cv2.IMREAD_GRAYSCALE)
     template = cv2.imread(template_path, cv2.IMREAD_GRAYSCALE)
 
@@ -64,14 +81,12 @@ def _find_opencv(template_path: str, screenshot_path: str, threshold: float):
     th, tw = template.shape[:2]
     result = cv2.matchTemplate(screen, template, cv2.TM_CCOEFF_NORMED)
 
-    # Find all matches above threshold
     locations = np.where(result >= threshold)
-    matches = []
-    seen = set()
+    matches: list[dict] = []
+    seen: set[tuple[int, int]] = set()
 
-    for pt in zip(*locations[::-1]):
+    for pt in zip(*locations[::-1], strict=False):
         x, y = int(pt[0]), int(pt[1])
-        # Deduplicate nearby matches (within 10px)
         key = (x // 10, y // 10)
         if key in seen:
             continue
@@ -91,7 +106,7 @@ def _find_opencv(template_path: str, screenshot_path: str, threshold: float):
         )
 
     matches.sort(key=lambda m: m["confidence"], reverse=True)
-    matches = matches[:20]  # Limit results
+    matches = matches[:20]
 
     _output(
         {
@@ -105,12 +120,16 @@ def _find_opencv(template_path: str, screenshot_path: str, threshold: float):
     )
 
 
-def _find_pil(template_path: str, screenshot_path: str, threshold: float):
-    """Template matching using PIL (slower fallback)."""
+def _find_pil(template_path: str, screenshot_path: str, threshold: float) -> None:
+    """Pure-PIL NCC fallback when OpenCV is not installed.
+
+    Both images are downscaled by 2× and the template is slid across the
+    screen in 4-pixel strides. Much slower than OpenCV but needs only
+    Pillow + numpy.
+    """
     screen = Image.open(screenshot_path).convert("L")
     template = Image.open(template_path).convert("L")
 
-    # Downscale for speed
     scale = 2
     sw, sh = screen.size[0] // scale, screen.size[1] // scale
     tw, th = template.size[0] // scale, template.size[1] // scale
@@ -131,8 +150,7 @@ def _find_pil(template_path: str, screenshot_path: str, threshold: float):
         _output({"status": "error", "error": "Template has no contrast"})
         return
 
-    matches = []
-    # Slide template across screen
+    matches: list[dict] = []
     for y in range(0, sh - th, 4):
         for x in range(0, sw - tw, 4):
             region = screen_arr[y : y + th, x : x + tw]
