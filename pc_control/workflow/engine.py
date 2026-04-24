@@ -1,9 +1,10 @@
 """Workflow engine — predefined action sequences triggered by a single command."""
 import json
 import os
+import subprocess
 import sys
 import time
-import subprocess
+
 
 def _output(data: dict):
     print(json.dumps(data, ensure_ascii=False))

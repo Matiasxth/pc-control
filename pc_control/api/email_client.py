@@ -6,7 +6,6 @@ import json
 import smtplib
 import sys
 from email.mime.text import MIMEText
-from pathlib import Path
 
 from pc_control.config import PROJECT_ROOT
 

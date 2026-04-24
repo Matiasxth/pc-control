@@ -1,8 +1,7 @@
 """Telegram Bot API integration."""
-import json
 import io
+import json
 import sys
-from pathlib import Path
 
 import requests
 

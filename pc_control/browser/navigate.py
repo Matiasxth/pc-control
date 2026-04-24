@@ -1,6 +1,5 @@
 """Browser navigation — goto, click, fill, text, eval, screenshot, etc."""
 import json
-import sys
 from datetime import datetime
 from pathlib import Path
 

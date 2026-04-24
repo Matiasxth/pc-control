@@ -106,7 +106,7 @@ def handle_command(args):
             _output(result)
             return
         # Fallback without daemon
-        import os, time
+        import os
         os.startfile(f"spotify:search:{args.query}")
         _output({"status": "ok", "action": "play_search_opened", "query": args.query})
 

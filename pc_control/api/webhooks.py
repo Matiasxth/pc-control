@@ -5,8 +5,7 @@ import subprocess
 import sys
 import time
 from datetime import datetime
-from http.server import HTTPServer, BaseHTTPRequestHandler
-from pathlib import Path
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import psutil
 

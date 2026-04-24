@@ -1,6 +1,6 @@
 """Screen diffing — compare screenshots using PIL + numpy."""
-import json
 import io
+import json
 import sys
 from datetime import datetime
 from pathlib import Path
