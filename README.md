@@ -32,8 +32,17 @@ Built for AI agents that need a single, JSON-out-first interface to drive a real
 ```bash
 git clone https://github.com/Matiasxth/pc-control.git
 cd pc-control
-pip install -r requirements.txt
+pip install -e ".[all]"
 python -m playwright install chromium
+```
+
+Install only the features you need via extras: `[browser]`, `[desktop]`, `[vision]`, `[ocr]`, or `[all]`.
+
+After install, either invocation works:
+
+```bash
+pc-control <module> <command> [args]       # via entry point
+python -m pc_control <module> <command>    # via module
 ```
 
 ## Quickstart
