@@ -84,7 +84,7 @@ Full command reference: run `python -m pc_control --help` (or `<module> --help`)
 
 ## License
 
-MIT — see [LICENSE](LICENSE) once published.
+MIT — see [LICENSE](LICENSE).
 
 ## Status
 
