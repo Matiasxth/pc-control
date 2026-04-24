@@ -1,6 +1,6 @@
 """WhatsApp Web control — open, send, read messages via Playwright."""
-import json
 import io
+import json
 import subprocess
 import sys
 import time
@@ -9,8 +9,9 @@ from pathlib import Path
 
 import psutil
 
+from pc_control.browser.daemon import _is_alive
+from pc_control.browser.daemon import _load_state as load_browser_state
 from pc_control.browser.session import browser_connection
-from pc_control.browser.daemon import _load_state as load_browser_state, _is_alive
 from pc_control.config import SCREENSHOTS_DIR
 
 if sys.stdout.encoding != "utf-8":

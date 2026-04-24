@@ -2,11 +2,9 @@
 import json
 import signal
 import sys
-import time
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
-
 
 MONITOR_JS = (Path(__file__).parent.parent / "scripts" / "whatsapp_monitor.js").read_text(encoding="utf-8")
 

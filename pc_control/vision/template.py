@@ -7,8 +7,6 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from pc_control.config import SCREENSHOTS_DIR
-
 if sys.stdout.encoding != "utf-8":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 

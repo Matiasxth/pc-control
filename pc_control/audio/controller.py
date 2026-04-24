@@ -2,6 +2,7 @@
 import json
 import sys
 
+
 def _output(data: dict):
     print(json.dumps(data, ensure_ascii=False))
 

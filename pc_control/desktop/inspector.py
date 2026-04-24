@@ -2,14 +2,12 @@
 import io
 import json
 import sys
-from functools import lru_cache
 
 if sys.stdout.encoding != "utf-8":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 try:
-    from pywinauto import Application, findwindows
-    from pywinauto.controls.uiawrapper import UIAWrapper
+    from pywinauto import Application
     HAS_PYWINAUTO = True
 except ImportError:
     HAS_PYWINAUTO = False

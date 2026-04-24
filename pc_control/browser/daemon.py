@@ -2,13 +2,17 @@
 import json
 import os
 import subprocess
-import sys
 import time
 from pathlib import Path
 
 import psutil
 
-from pc_control.config import BROWSER_STATE_DIR, BROWSER_STATE_FILE, BROWSER_USER_DATA, DEFAULT_CDP_PORT
+from pc_control.config import (
+    BROWSER_STATE_DIR,
+    BROWSER_STATE_FILE,
+    BROWSER_USER_DATA,
+    DEFAULT_CDP_PORT,
+)
 
 # Chromium from Playwright installation
 CHROMIUM_EXE = Path(os.environ.get("LOCALAPPDATA", "")) / "ms-playwright" / "chromium-1208" / "chrome-win64" / "chrome.exe"

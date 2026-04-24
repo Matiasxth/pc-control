@@ -1,6 +1,5 @@
 """Browser recording — record user actions via background daemon."""
 import json
-import os
 import subprocess
 import sys
 import time
@@ -9,7 +8,7 @@ from pathlib import Path
 
 import psutil
 
-from pc_control.config import RECORDINGS_DIR, DEFAULT_CDP_PORT
+from pc_control.config import RECORDINGS_DIR
 
 
 def _output(data: dict):
@@ -43,7 +42,8 @@ def start_recording(url=None, session_name=None):
         _output({"status": "error", "error": "Already recording. Run 'browser record stop' first."})
         return
 
-    from pc_control.browser.daemon import _load_state as load_browser_state, _is_alive
+    from pc_control.browser.daemon import _is_alive
+    from pc_control.browser.daemon import _load_state as load_browser_state
     browser_state = load_browser_state()
     if not browser_state or not _is_alive(browser_state["pid"]):
         _output({"status": "error", "error": "Browser not running. Run 'browser start --headed' first."})
@@ -74,7 +74,6 @@ def start_recording(url=None, session_name=None):
                 _output({"status": "error", "error": f"Daemon exited: {stderr}"})
                 return
             # Check if ready line is available
-            import select
             line = proc.stdout.readline().decode(errors="replace").strip()
             if line.startswith("RECORDER_READY:"):
                 break

@@ -373,7 +373,6 @@ class DesktopDaemon:
             return {"status": "error", "error": "Must specify name, control_type, or control_path"}
 
         # Try set_edit_text / ValuePattern first (works in background)
-        type_method = "set_value"
         try:
             ctrl.set_edit_text(text)
         except Exception:
@@ -382,7 +381,6 @@ class DesktopDaemon:
                 ctrl.iface_value.SetValue(text)
             except Exception:
                 # Fallback: need foreground for keyboard simulation
-                type_method = "type_keys"
                 was_minimized = False
                 try:
                     was_minimized = conn.get_window().is_minimized()
@@ -495,7 +493,7 @@ class DesktopDaemon:
                     client, addr = server.accept()
                     t = threading.Thread(target=self._handle_client, args=(client,), daemon=True)
                     t.start()
-                except socket.timeout:
+                except TimeoutError:
                     continue
         except KeyboardInterrupt:
             pass

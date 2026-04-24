@@ -1,8 +1,8 @@
 """App launcher — unified way to open any application."""
 import json
-import os
 import subprocess
 import sys
+
 
 def _output(data: dict):
     print(json.dumps(data, ensure_ascii=False))
@@ -46,7 +46,7 @@ def open_app(name: str, target: str = None):
             subprocess.Popen(cmd, shell=True)
             _output({"status": "ok", "action": "open", "app": name, "target": target, "method": "direct"})
             return
-        except Exception as e:
+        except Exception:
             _output({"status": "error", "error": f"Unknown app: {name}. Use 'app list' to see available apps."})
             return
 

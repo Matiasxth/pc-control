@@ -5,10 +5,6 @@ import json
 import sys
 from pathlib import Path
 
-from PIL import Image
-
-from pc_control.config import SCREENSHOTS_DIR
-
 if sys.stdout.encoding != "utf-8":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
@@ -19,10 +15,10 @@ def _output(data: dict):
 
 async def _ocr_with_bounds_async(image_path: str, language: str = "es") -> dict:
     """Run OCR and return text with bounding rectangles."""
-    from winrt.windows.media.ocr import OcrEngine
-    from winrt.windows.graphics.imaging import BitmapDecoder
-    from winrt.windows.storage import StorageFile, FileAccessMode
     from winrt.windows.globalization import Language
+    from winrt.windows.graphics.imaging import BitmapDecoder
+    from winrt.windows.media.ocr import OcrEngine
+    from winrt.windows.storage import FileAccessMode, StorageFile
 
     abs_path = str(Path(image_path).resolve())
     file = await StorageFile.get_file_from_path_async(abs_path)

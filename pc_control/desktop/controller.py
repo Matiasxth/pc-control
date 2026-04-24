@@ -1,13 +1,13 @@
 """Desktop UI controller — interact with controls via pywinauto."""
-import json
 import io
+import json
 import sys
 import time
 
 if sys.stdout.encoding != "utf-8":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
-from pc_control.desktop.inspector import _connect, _navigate_to_control, _check, find_control
+from pc_control.desktop.inspector import _connect, _navigate_to_control, find_control
 
 
 def _output(data: dict):

@@ -6,11 +6,11 @@ from pathlib import Path
 
 from PIL import ImageGrab
 
-from pc_control.config import SCREENSHOTS_DIR, SCREENSHOT_FORMAT, SCREENSHOT_QUALITY
+from pc_control.config import SCREENSHOT_FORMAT, SCREENSHOT_QUALITY, SCREENSHOTS_DIR
 
 try:
-    import win32gui
     import win32con
+    import win32gui
     HAS_WIN32 = True
 except ImportError:
     HAS_WIN32 = False

@@ -4,7 +4,8 @@ from contextlib import contextmanager
 
 from playwright.sync_api import sync_playwright
 
-from pc_control.browser.daemon import _load_state, _is_alive, _is_cdp_responsive, start as start_daemon
+from pc_control.browser.daemon import _is_alive, _is_cdp_responsive, _load_state
+from pc_control.browser.daemon import start as start_daemon
 from pc_control.config import DEFAULT_CDP_PORT
 
 

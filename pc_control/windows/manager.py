@@ -10,10 +10,10 @@ if sys.stdout.encoding != "utf-8":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 try:
-    import win32gui
-    import win32con
-    import win32process
     import psutil
+    import win32con
+    import win32gui
+    import win32process
     HAS_WIN32 = True
 except ImportError:
     HAS_WIN32 = False

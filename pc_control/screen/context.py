@@ -1,17 +1,18 @@
 """Screen context — fast text-based screen summary without screenshots."""
+import io
 import json
 import sys
-import io
 
 if sys.stdout.encoding != "utf-8":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 try:
+    import ctypes
+
+    import psutil
+    import win32con
     import win32gui
     import win32process
-    import win32con
-    import psutil
-    import ctypes
     HAS_WIN32 = True
 except ImportError:
     HAS_WIN32 = False
