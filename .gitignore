@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Runtime state (per-user, not source)
+.browser/
+.chat/
+.api/
+.desktop/
+.layouts/
+
+# User-generated artifacts
+screenshots/*.png
+screenshots/*.jpg
+screenshots/*.jpeg
+recordings/*.json
+recordings/*.py
+vision_output/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
