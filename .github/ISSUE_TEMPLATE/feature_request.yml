@@ -1,0 +1,40 @@
+name: Feature request
+description: Suggest a new command, subcommand, or integration
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: Describe the automation goal, not the proposed solution. "I want to …" is a good start.
+    validations:
+      required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: How would you do it today (if at all)?
+      description: Chain of existing pc-control commands, a separate tool, a manual step, etc.
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed shape
+      description: |
+        What command or option would you add? A rough sketch is fine. Example:
+        ```
+        pc-control screen record start --output demo.mp4 --fps 15
+        pc-control screen record stop
+        ```
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - label: This should live in an existing module.
+          required: false
+        - label: This needs a new top-level module.
+          required: false
+        - label: This requires an optional dependency (name it in the description).
+          required: false
