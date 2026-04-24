@@ -1,4 +1,5 @@
 """Browser command dispatcher — routes CLI args to browser modules."""
+
 import sys
 
 from pc_control.browser import daemon, navigate
@@ -63,6 +64,7 @@ def handle_command(args):
     # Recording commands
     elif cmd == "record":
         from pc_control.browser.recording import handle_record_command
+
         handle_record_command(args)
 
     else:

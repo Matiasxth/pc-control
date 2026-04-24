@@ -1,4 +1,5 @@
 """Desktop UI controller — interact with controls via pywinauto."""
+
 import io
 import json
 import sys
@@ -64,7 +65,9 @@ def _resolve_control(app_query, control_path=None, name=None, control_type=None)
         return None, None, None
 
 
-def click_control(app_query: str, control_path: str = None, name: str = None, control_type: str = None):
+def click_control(
+    app_query: str, control_path: str = None, name: str = None, control_type: str = None
+):
     """Click a control by path, name, or type."""
     app, ctrl, info = _resolve_control(app_query, control_path, name, control_type)
     if not ctrl:
@@ -77,12 +80,17 @@ def click_control(app_query: str, control_path: str = None, name: str = None, co
             "status": "ok",
             "action": "desktop_click",
             "app": app_query,
-            "control_type": ctrl.friendly_class_name() if hasattr(ctrl, 'friendly_class_name') else "unknown",
-            "control_name": ctrl.window_text() if hasattr(ctrl, 'window_text') else "",
+            "control_type": ctrl.friendly_class_name()
+            if hasattr(ctrl, "friendly_class_name")
+            else "unknown",
+            "control_name": ctrl.window_text() if hasattr(ctrl, "window_text") else "",
         }
         try:
             rect = ctrl.rectangle()
-            result["clicked_at"] = {"x": (rect.left + rect.right) // 2, "y": (rect.top + rect.bottom) // 2}
+            result["clicked_at"] = {
+                "x": (rect.left + rect.right) // 2,
+                "y": (rect.top + rect.bottom) // 2,
+            }
         except Exception:
             pass
         _output(result)
@@ -106,13 +114,15 @@ def type_in_control(app_query: str, control_path: str = None, text: str = "", na
             ctrl.click_input()
             ctrl.type_keys(text, with_spaces=True, pause=0.02)
 
-        _output({
-            "status": "ok",
-            "action": "desktop_type",
-            "app": app_query,
-            "control_name": ctrl.window_text() if hasattr(ctrl, 'window_text') else "",
-            "length": len(text),
-        })
+        _output(
+            {
+                "status": "ok",
+                "action": "desktop_type",
+                "app": app_query,
+                "control_name": ctrl.window_text() if hasattr(ctrl, "window_text") else "",
+                "length": len(text),
+            }
+        )
     except Exception as e:
         _output({"status": "error", "error": str(e)})
 
@@ -132,12 +142,14 @@ def select_item(app_query: str, control_path: str, item: str):
             return
 
         ctrl.select(item)
-        _output({
-            "status": "ok",
-            "action": "desktop_select",
-            "app": app_query,
-            "control_path": control_path,
-            "item": item,
-        })
+        _output(
+            {
+                "status": "ok",
+                "action": "desktop_select",
+                "app": app_query,
+                "control_path": control_path,
+                "item": item,
+            }
+        )
     except Exception as e:
         _output({"status": "error", "error": str(e)})

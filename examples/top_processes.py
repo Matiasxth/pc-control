@@ -8,6 +8,7 @@ Demonstrates the typical subprocess + JSON pattern:
 Usage:
     python examples/top_processes.py --limit 5
 """
+
 from __future__ import annotations
 
 import argparse
@@ -30,14 +31,10 @@ def run_pc_control(*args: str) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--limit", type=int, default=10, help="How many to show")
-    parser.add_argument(
-        "--sort", choices=["cpu", "memory"], default="cpu", help="Sort key"
-    )
+    parser.add_argument("--sort", choices=["cpu", "memory"], default="cpu", help="Sort key")
     args = parser.parse_args()
 
-    data = run_pc_control(
-        "system", "processes", "--sort", args.sort, "--limit", str(args.limit)
-    )
+    data = run_pc_control("system", "processes", "--sort", args.sort, "--limit", str(args.limit))
     if data.get("status") != "ok":
         print(f"error: {data.get('error')}", file=sys.stderr)
         return 1
@@ -46,8 +43,7 @@ def main() -> int:
     print(f"{'PID':>7}  {'NAME':<{width}}  {'CPU%':>6}  {'MEM (MB)':>9}")
     for p in data["processes"]:
         print(
-            f"{p['pid']:>7}  {p['name']:<{width}}  "
-            f"{p['cpu_percent']:>6.1f}  {p['memory_mb']:>9.1f}"
+            f"{p['pid']:>7}  {p['name']:<{width}}  {p['cpu_percent']:>6.1f}  {p['memory_mb']:>9.1f}"
         )
     return 0
 

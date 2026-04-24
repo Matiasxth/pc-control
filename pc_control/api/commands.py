@@ -1,4 +1,5 @@
 """API connectors command dispatcher."""
+
 import sys
 
 
@@ -7,6 +8,7 @@ def handle_command(args):
 
     if service == "telegram":
         from pc_control.api import telegram
+
         cmd = args.telegram_command
         if cmd == "configure":
             telegram.configure(args.token)
@@ -15,19 +17,25 @@ def handle_command(args):
         elif cmd == "send":
             telegram.send_message(args.chat_id, args.message, token=getattr(args, "token", None))
         elif cmd == "updates":
-            telegram.get_updates(token=getattr(args, "token", None), limit=getattr(args, "limit", 20))
+            telegram.get_updates(
+                token=getattr(args, "token", None), limit=getattr(args, "limit", 20)
+            )
         else:
             print(f"Unknown telegram command: {cmd}", file=sys.stderr)
             sys.exit(1)
 
     elif service == "email":
         from pc_control.api import email_client
+
         cmd = args.email_command
         if cmd == "configure":
             email_client.configure(
-                args.smtp_host, args.smtp_port,
-                args.imap_host, args.imap_port,
-                args.user, getattr(args, "password", ""),
+                args.smtp_host,
+                args.smtp_port,
+                args.imap_host,
+                args.imap_port,
+                args.user,
+                getattr(args, "password", ""),
             )
         elif cmd == "send":
             email_client.send_email(args.to, args.subject, args.body)
@@ -42,6 +50,7 @@ def handle_command(args):
 
     elif service == "webhook":
         from pc_control.api import webhooks
+
         cmd = args.webhook_command
         if cmd == "start":
             webhooks.start_webhook(port=getattr(args, "port", 8765))

@@ -1,4 +1,5 @@
 """Screen capture — PIL.ImageGrab for full/region, win32gui for window bounds."""
+
 from __future__ import annotations
 
 import json

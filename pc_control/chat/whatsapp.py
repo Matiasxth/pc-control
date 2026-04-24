@@ -1,4 +1,5 @@
 """WhatsApp Web control — open, send, read messages via Playwright."""
+
 import io
 import json
 import subprocess
@@ -38,7 +39,9 @@ def start_whatsapp():
     """Open WhatsApp Web in the persistent browser."""
     browser_state = load_browser_state()
     if not browser_state or not _is_alive(browser_state["pid"]):
-        _output({"status": "error", "error": "Browser not running. Run 'browser start --headed' first."})
+        _output(
+            {"status": "error", "error": "Browser not running. Run 'browser start --headed' first."}
+        )
         return
 
     with browser_connection() as (browser, ctx, page):
@@ -57,7 +60,7 @@ def start_whatsapp():
 
         # Wait for either QR code or logged-in state
         try:
-            wa_page.wait_for_selector(f'{SEL_SEARCH}, {SEL_QR}', timeout=15000)
+            wa_page.wait_for_selector(f"{SEL_SEARCH}, {SEL_QR}", timeout=15000)
         except Exception:
             pass
 
@@ -68,22 +71,26 @@ def start_whatsapp():
             ts = datetime.now().strftime("%Y%m%d_%H%M%S")
             qr_path = SCREENSHOTS_DIR / f"whatsapp_qr_{ts}.png"
             wa_page.screenshot(path=str(qr_path))
-            _output({
-                "status": "ok",
-                "action": "whatsapp_start",
-                "logged_in": False,
-                "qr_screenshot": str(qr_path.resolve()),
-                "message": "Scan the QR code with your phone. Then run 'chat whatsapp status' to verify.",
-            })
+            _output(
+                {
+                    "status": "ok",
+                    "action": "whatsapp_start",
+                    "logged_in": False,
+                    "qr_screenshot": str(qr_path.resolve()),
+                    "message": "Scan the QR code with your phone. Then run 'chat whatsapp status' to verify.",
+                }
+            )
             return
 
         # Already logged in
-        _output({
-            "status": "ok",
-            "action": "whatsapp_start",
-            "logged_in": True,
-            "url": wa_page.url,
-        })
+        _output(
+            {
+                "status": "ok",
+                "action": "whatsapp_start",
+                "logged_in": True,
+                "url": wa_page.url,
+            }
+        )
 
 
 def status():
@@ -110,14 +117,16 @@ def status():
         except Exception:
             pass
 
-    _output({
-        "status": "ok",
-        "action": "whatsapp_status",
-        "browser_running": browser_running,
-        "logged_in": logged_in,
-        "monitor_daemon": daemon_running,
-        "monitor_pid": monitor_state.get("daemon_pid") if monitor_state else None,
-    })
+    _output(
+        {
+            "status": "ok",
+            "action": "whatsapp_status",
+            "browser_running": browser_running,
+            "logged_in": logged_in,
+            "monitor_daemon": daemon_running,
+            "monitor_pid": monitor_state.get("daemon_pid") if monitor_state else None,
+        }
+    )
 
 
 def send_message(contact: str, message: str):
@@ -125,7 +134,12 @@ def send_message(contact: str, message: str):
     with browser_connection() as (browser, ctx, page):
         wa_page = _find_wa_page(ctx)
         if not wa_page:
-            _output({"status": "error", "error": "WhatsApp Web not open. Run 'chat whatsapp start' first."})
+            _output(
+                {
+                    "status": "error",
+                    "error": "WhatsApp Web not open. Run 'chat whatsapp start' first.",
+                }
+            )
             return
 
         wa_page.bring_to_front()
@@ -155,12 +169,14 @@ def send_message(contact: str, message: str):
         wa_page.keyboard.type(message)
         wa_page.keyboard.press("Enter")
 
-        _output({
-            "status": "ok",
-            "action": "whatsapp_send",
-            "contact": contact,
-            "message_length": len(message),
-        })
+        _output(
+            {
+                "status": "ok",
+                "action": "whatsapp_send",
+                "contact": contact,
+                "message_length": len(message),
+            }
+        )
 
 
 def read_messages(contact: str = None, limit: int = 20):
@@ -209,13 +225,15 @@ def read_messages(contact: str = None, limit: int = 20):
             return result;
         }})()""")
 
-        _output({
-            "status": "ok",
-            "action": "whatsapp_read",
-            "contact": contact,
-            "count": len(messages),
-            "messages": messages,
-        })
+        _output(
+            {
+                "status": "ok",
+                "action": "whatsapp_read",
+                "contact": contact,
+                "count": len(messages),
+                "messages": messages,
+            }
+        )
 
 
 def monitor_start():
@@ -228,8 +246,14 @@ def monitor_start():
     # Check if already monitoring
     state = _load_monitor_state()
     if state and psutil.pid_exists(state.get("daemon_pid", 0)):
-        _output({"status": "ok", "action": "monitor_start", "message": "Already monitoring",
-                 "pid": state["daemon_pid"]})
+        _output(
+            {
+                "status": "ok",
+                "action": "monitor_start",
+                "message": "Already monitoring",
+                "pid": state["daemon_pid"],
+            }
+        )
         return
 
     port = browser_state["port"]
@@ -264,18 +288,22 @@ def monitor_start():
         _output({"status": "error", "error": f"Error starting daemon: {e}"})
         return
 
-    _save_monitor_state({
-        "daemon_pid": proc.pid,
-        "events_file": str(events_file),
-        "started_at": datetime.now().isoformat(),
-    })
+    _save_monitor_state(
+        {
+            "daemon_pid": proc.pid,
+            "events_file": str(events_file),
+            "started_at": datetime.now().isoformat(),
+        }
+    )
 
-    _output({
-        "status": "ok",
-        "action": "monitor_start",
-        "daemon_pid": proc.pid,
-        "events_file": str(events_file),
-    })
+    _output(
+        {
+            "status": "ok",
+            "action": "monitor_start",
+            "daemon_pid": proc.pid,
+            "events_file": str(events_file),
+        }
+    )
 
 
 def monitor_stop():
@@ -305,7 +333,9 @@ def monitor_messages(since: str = None):
     """Read messages captured by the monitor daemon."""
     state = _load_monitor_state()
     if not state:
-        _output({"status": "error", "error": "No monitor active. Run 'chat whatsapp monitor start'"})
+        _output(
+            {"status": "error", "error": "No monitor active. Run 'chat whatsapp monitor start'"}
+        )
         return
 
     events_file = Path(state["events_file"])
@@ -318,12 +348,14 @@ def monitor_messages(since: str = None):
     if since:
         messages = [m for m in messages if m.get("timestamp", "") >= since]
 
-    _output({
-        "status": "ok",
-        "action": "monitor_messages",
-        "count": len(messages),
-        "messages": messages,
-    })
+    _output(
+        {
+            "status": "ok",
+            "action": "monitor_messages",
+            "count": len(messages),
+            "messages": messages,
+        }
+    )
 
 
 def _find_wa_page(ctx):

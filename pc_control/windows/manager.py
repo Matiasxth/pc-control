@@ -1,4 +1,5 @@
 """Window management module — list, focus, resize, minimize/maximize via win32gui."""
+
 import ctypes
 import io
 import json
@@ -14,6 +15,7 @@ try:
     import win32con
     import win32gui
     import win32process
+
     HAS_WIN32 = True
 except ImportError:
     HAS_WIN32 = False
@@ -60,16 +62,18 @@ def list_windows(filter_query=None):
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             proc_name = "unknown"
 
-        windows.append({
-            "hwnd": hwnd,
-            "title": title,
-            "pid": pid,
-            "process": proc_name,
-            "rect": {"left": rect[0], "top": rect[1], "right": rect[2], "bottom": rect[3]},
-            "width": rect[2] - rect[0],
-            "height": rect[3] - rect[1],
-            "state": _get_window_state(hwnd),
-        })
+        windows.append(
+            {
+                "hwnd": hwnd,
+                "title": title,
+                "pid": pid,
+                "process": proc_name,
+                "rect": {"left": rect[0], "top": rect[1], "right": rect[2], "bottom": rect[3]},
+                "width": rect[2] - rect[0],
+                "height": rect[3] - rect[1],
+                "state": _get_window_state(hwnd),
+            }
+        )
         return True
 
     win32gui.EnumWindows(callback, None)
@@ -133,7 +137,16 @@ def resize_window(hwnd, width, height):
     rect = win32gui.GetWindowRect(hwnd)
     win32gui.MoveWindow(hwnd, rect[0], rect[1], width, height, True)
     title = win32gui.GetWindowText(hwnd)
-    _output({"status": "ok", "action": "resize", "hwnd": hwnd, "title": title, "width": width, "height": height})
+    _output(
+        {
+            "status": "ok",
+            "action": "resize",
+            "hwnd": hwnd,
+            "title": title,
+            "width": width,
+            "height": height,
+        }
+    )
 
 
 def move_window(hwnd, x, y):
@@ -181,17 +194,22 @@ def snap_window(hwnd, position):
 
     # Snap mapping: position -> sequence of Win+Arrow keys
     _SNAP_KEYS = {
-        "left":         [("win", "left")],
-        "right":        [("win", "right")],
-        "maximize":     [("win", "up")],
-        "top-left":     [("win", "left"), ("win", "up")],
-        "top-right":    [("win", "right"), ("win", "up")],
-        "bottom-left":  [("win", "left"), ("win", "down")],
+        "left": [("win", "left")],
+        "right": [("win", "right")],
+        "maximize": [("win", "up")],
+        "top-left": [("win", "left"), ("win", "up")],
+        "top-right": [("win", "right"), ("win", "up")],
+        "bottom-left": [("win", "left"), ("win", "down")],
         "bottom-right": [("win", "right"), ("win", "down")],
     }
 
     if position not in _SNAP_KEYS:
-        _output({"status": "error", "error": f"Invalid position: {position}. Use: {', '.join(_SNAP_KEYS.keys())}"})
+        _output(
+            {
+                "status": "error",
+                "error": f"Invalid position: {position}. Use: {', '.join(_SNAP_KEYS.keys())}",
+            }
+        )
         return
 
     # 1. Focus and maximize first (resets snap state so snap always works)
@@ -224,6 +242,7 @@ def handle_command(args):
 
     if cmd == "layout":
         from pc_control.windows.layouts import handle_command as layout_handle
+
         layout_handle(args)
         return
 

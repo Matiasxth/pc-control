@@ -1,4 +1,5 @@
 """CLI argument parser and command dispatcher."""
+
 import argparse
 import sys
 
@@ -62,7 +63,9 @@ def build_parser():
     smooth.add_argument("x", type=int)
     smooth.add_argument("y", type=int)
     smooth.add_argument("--duration", type=float, default=0.5)
-    smooth.add_argument("--curve", choices=["ease", "ease-in", "ease-out", "ease-in-out", "linear"], default="ease")
+    smooth.add_argument(
+        "--curve", choices=["ease", "ease-in", "ease-out", "ease-in-out", "linear"], default="ease"
+    )
 
     # Mouse: draw path
     draw = input_sub.add_parser("draw", help="Draw smooth curve through points")
@@ -106,7 +109,18 @@ def build_parser():
 
     wsnap = win_sub.add_parser("snap", help="Snap window (left, right, top-left, etc.)")
     wsnap.add_argument("query", nargs="?", help="Window title")
-    wsnap.add_argument("position", choices=["left", "right", "top-left", "top-right", "bottom-left", "bottom-right", "maximize"])
+    wsnap.add_argument(
+        "position",
+        choices=[
+            "left",
+            "right",
+            "top-left",
+            "top-right",
+            "bottom-left",
+            "bottom-right",
+            "maximize",
+        ],
+    )
     wsnap.add_argument("--hwnd", type=int, help="Window handle")
 
     for cmd_name in ["minimize", "maximize", "restore", "close"]:
@@ -435,58 +449,72 @@ def dispatch(args):
 
     if module == "screen":
         from pc_control.screen.capture import handle_command
+
         handle_command(args)
 
     elif module == "input":
         from pc_control.input.controller import handle_command
+
         handle_command(args)
 
     elif module == "windows":
         from pc_control.windows.manager import handle_command
+
         handle_command(args)
 
     elif module == "browser":
         from pc_control.browser.commands import handle_command
+
         handle_command(args)
 
     elif module == "system":
         from pc_control.system.monitor import handle_command
+
         handle_command(args)
 
     elif module == "clipboard":
         from pc_control.system.clipboard import handle_command
+
         handle_command(args)
 
     elif module == "ocr":
         from pc_control.ocr.windows_ocr import handle_command
+
         handle_command(args)
 
     elif module == "desktop":
         from pc_control.desktop.commands import handle_command
+
         handle_command(args)
 
     elif module == "vision":
         from pc_control.vision.commands import handle_command
+
         handle_command(args)
 
     elif module == "chat":
         from pc_control.chat.commands import handle_command
+
         handle_command(args)
 
     elif module == "api":
         from pc_control.api.commands import handle_command
+
         handle_command(args)
 
     elif module == "audio":
         from pc_control.audio.controller import handle_command
+
         handle_command(args)
 
     elif module == "app":
         from pc_control.app.launcher import handle_command
+
         handle_command(args)
 
     elif module == "workflow":
         from pc_control.workflow.engine import handle_command
+
         handle_command(args)
 
     else:
@@ -503,5 +531,6 @@ def main():
         sys.exit(130)
     except Exception as e:
         import json
+
         print(json.dumps({"status": "error", "error": str(e)}))
         sys.exit(1)

@@ -1,4 +1,5 @@
 """Central configuration and constants."""
+
 import ctypes
 import sys
 from pathlib import Path

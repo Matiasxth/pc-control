@@ -1,4 +1,5 @@
 """Clipboard read/write via the Win32 clipboard API."""
+
 from __future__ import annotations
 
 import json

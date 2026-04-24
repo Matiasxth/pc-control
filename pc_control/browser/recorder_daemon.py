@@ -1,4 +1,5 @@
 """Background recorder daemon — keeps Playwright connection alive to capture events."""
+
 import json
 import signal
 import sys

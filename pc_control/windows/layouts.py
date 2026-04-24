@@ -1,4 +1,5 @@
 """Window layouts — save and restore window arrangements."""
+
 import io
 import json
 import sys
@@ -12,6 +13,7 @@ try:
     import win32con
     import win32gui
     import win32process
+
     HAS_WIN32 = True
 except ImportError:
     HAS_WIN32 = False
@@ -63,14 +65,16 @@ def save_layout(name: str):
         if w <= 0 and h <= 0 and state != "minimized":
             return True
 
-        windows.append({
-            "process": proc,
-            "title": title,
-            "state": state,
-            "rect": {"left": rect[0], "top": rect[1], "right": rect[2], "bottom": rect[3]},
-            "width": w,
-            "height": h,
-        })
+        windows.append(
+            {
+                "process": proc,
+                "title": title,
+                "state": state,
+                "rect": {"left": rect[0], "top": rect[1], "right": rect[2], "bottom": rect[3]},
+                "width": w,
+                "height": h,
+            }
+        )
         return True
 
     win32gui.EnumWindows(callback, None)
@@ -79,7 +83,15 @@ def save_layout(name: str):
     path = LAYOUTS_DIR / f"{name}.json"
     path.write_text(json.dumps(layout, indent=2, ensure_ascii=False), encoding="utf-8")
 
-    _output({"status": "ok", "action": "layout_save", "name": name, "windows": len(windows), "path": str(path)})
+    _output(
+        {
+            "status": "ok",
+            "action": "layout_save",
+            "name": name,
+            "windows": len(windows),
+            "path": str(path),
+        }
+    )
 
 
 def load_layout(name: str):
@@ -123,7 +135,15 @@ def load_layout(name: str):
         except Exception:
             skipped += 1
 
-    _output({"status": "ok", "action": "layout_load", "name": name, "restored": restored, "skipped": skipped})
+    _output(
+        {
+            "status": "ok",
+            "action": "layout_load",
+            "name": name,
+            "restored": restored,
+            "skipped": skipped,
+        }
+    )
 
 
 def list_layouts():

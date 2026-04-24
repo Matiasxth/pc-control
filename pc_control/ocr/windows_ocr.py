@@ -1,4 +1,5 @@
 """OCR module — Windows.Media.Ocr via Python WinRT bindings."""
+
 import asyncio
 import io
 import json
@@ -47,7 +48,15 @@ def ocr_file(image_path, language="es"):
 
     try:
         text = asyncio.run(_ocr_async(str(path), language))
-        _output({"status": "ok", "action": "ocr", "text": text, "file": str(path.resolve()), "length": len(text)})
+        _output(
+            {
+                "status": "ok",
+                "action": "ocr",
+                "text": text,
+                "file": str(path.resolve()),
+                "length": len(text),
+            }
+        )
     except Exception as e:
         _output({"status": "error", "error": str(e)})
 

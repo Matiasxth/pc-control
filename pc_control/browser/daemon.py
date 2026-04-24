@@ -1,4 +1,5 @@
 """Browser daemon — launch/kill persistent Chromium via CDP."""
+
 import json
 import os
 import subprocess
@@ -15,7 +16,13 @@ from pc_control.config import (
 )
 
 # Chromium from Playwright installation
-CHROMIUM_EXE = Path(os.environ.get("LOCALAPPDATA", "")) / "ms-playwright" / "chromium-1208" / "chrome-win64" / "chrome.exe"
+CHROMIUM_EXE = (
+    Path(os.environ.get("LOCALAPPDATA", ""))
+    / "ms-playwright"
+    / "chromium-1208"
+    / "chrome-win64"
+    / "chrome.exe"
+)
 
 
 def _output(data: dict):
@@ -44,6 +51,7 @@ def _is_alive(pid: int) -> bool:
 
 def _is_cdp_responsive(port: int) -> bool:
     import urllib.request
+
     try:
         resp = urllib.request.urlopen(f"http://localhost:{port}/json/version", timeout=3)
         return resp.status == 200
@@ -58,8 +66,15 @@ def start(headed=False, port=None):
     # Check if already running
     state = _load_state()
     if state and _is_alive(state["pid"]) and _is_cdp_responsive(state["port"]):
-        _output({"status": "ok", "action": "browser_start", "message": "Already running",
-                 "pid": state["pid"], "port": state["port"]})
+        _output(
+            {
+                "status": "ok",
+                "action": "browser_start",
+                "message": "Already running",
+                "pid": state["pid"],
+                "port": state["port"],
+            }
+        )
         return
 
     # Clean stale state
@@ -112,7 +127,9 @@ def start(headed=False, port=None):
     }
     _save_state(state)
 
-    _output({"status": "ok", "action": "browser_start", "pid": proc.pid, "port": port, "headed": headed})
+    _output(
+        {"status": "ok", "action": "browser_start", "pid": proc.pid, "port": port, "headed": headed}
+    )
 
 
 def status():
@@ -128,16 +145,18 @@ def status():
     if not alive:
         _clear_state()
 
-    _output({
-        "status": "ok",
-        "action": "browser_status",
-        "running": alive and cdp_ok,
-        "pid": state.get("pid"),
-        "port": state.get("port"),
-        "headless": state.get("headless"),
-        "process_alive": alive,
-        "cdp_responsive": cdp_ok,
-    })
+    _output(
+        {
+            "status": "ok",
+            "action": "browser_status",
+            "running": alive and cdp_ok,
+            "pid": state.get("pid"),
+            "port": state.get("port"),
+            "headless": state.get("headless"),
+            "process_alive": alive,
+            "cdp_responsive": cdp_ok,
+        }
+    )
 
 
 def stop():

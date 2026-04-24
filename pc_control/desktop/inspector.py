@@ -1,4 +1,5 @@
 """Desktop UI inspector — read controls directly via pywinauto."""
+
 import io
 import json
 import sys
@@ -8,6 +9,7 @@ if sys.stdout.encoding != "utf-8":
 
 try:
     from pywinauto import Application
+
     HAS_PYWINAUTO = True
 except ImportError:
     HAS_PYWINAUTO = False
@@ -48,9 +50,10 @@ def _find_pid_by_process_name(process_name: str) -> list[int]:
     pids = []
     try:
         import psutil
-        for proc in psutil.process_iter(['pid', 'name']):
-            if proc.info['name'] and proc.info['name'].lower() == process_name.lower():
-                pids.append(proc.info['pid'])
+
+        for proc in psutil.process_iter(["pid", "name"]):
+            if proc.info["name"] and proc.info["name"].lower() == process_name.lower():
+                pids.append(proc.info["pid"])
     except Exception:
         pass
     return pids
@@ -61,6 +64,7 @@ def _find_pid_by_title(query: str) -> int | None:
     try:
         import win32gui
         import win32process
+
         results = []
 
         def callback(hwnd, _):
@@ -140,10 +144,12 @@ def _control_info(ctrl, include_children=False, depth=0, max_depth=3, path_prefi
     """Extract control information as a dict."""
     try:
         info = {
-            "control_type": ctrl.friendly_class_name() if hasattr(ctrl, 'friendly_class_name') else type(ctrl).__name__,
-            "title": ctrl.window_text() if hasattr(ctrl, 'window_text') else "",
-            "visible": ctrl.is_visible() if hasattr(ctrl, 'is_visible') else True,
-            "enabled": ctrl.is_enabled() if hasattr(ctrl, 'is_enabled') else True,
+            "control_type": ctrl.friendly_class_name()
+            if hasattr(ctrl, "friendly_class_name")
+            else type(ctrl).__name__,
+            "title": ctrl.window_text() if hasattr(ctrl, "window_text") else "",
+            "visible": ctrl.is_visible() if hasattr(ctrl, "is_visible") else True,
+            "enabled": ctrl.is_enabled() if hasattr(ctrl, "is_enabled") else True,
         }
 
         # Build path
@@ -154,15 +160,20 @@ def _control_info(ctrl, include_children=False, depth=0, max_depth=3, path_prefi
         # Get rectangle
         try:
             rect = ctrl.rectangle()
-            info["rect"] = {"left": rect.left, "top": rect.top, "right": rect.right, "bottom": rect.bottom}
+            info["rect"] = {
+                "left": rect.left,
+                "top": rect.top,
+                "right": rect.right,
+                "bottom": rect.bottom,
+            }
         except Exception:
             pass
 
         # Get value for specific control types
         try:
-            if hasattr(ctrl, 'get_value'):
+            if hasattr(ctrl, "get_value"):
                 info["value"] = ctrl.get_value()
-            elif hasattr(ctrl, 'texts'):
+            elif hasattr(ctrl, "texts"):
                 texts = ctrl.texts()
                 if texts:
                     info["value"] = texts[0] if len(texts) == 1 else texts
@@ -171,7 +182,7 @@ def _control_info(ctrl, include_children=False, depth=0, max_depth=3, path_prefi
 
         # Get automation ID (UIA)
         try:
-            if hasattr(ctrl, 'automation_id'):
+            if hasattr(ctrl, "automation_id"):
                 aid = ctrl.automation_id()
                 if aid:
                     info["automation_id"] = aid
@@ -205,11 +216,15 @@ def _control_info(ctrl, include_children=False, depth=0, max_depth=3, path_prefi
 def _desc_info(ctrl) -> dict | None:
     """Extract compact info from a single control (for scan)."""
     try:
-        ct = ctrl.friendly_class_name() if hasattr(ctrl, 'friendly_class_name') else type(ctrl).__name__
-        title = ctrl.window_text() if hasattr(ctrl, 'window_text') else ""
+        ct = (
+            ctrl.friendly_class_name()
+            if hasattr(ctrl, "friendly_class_name")
+            else type(ctrl).__name__
+        )
+        title = ctrl.window_text() if hasattr(ctrl, "window_text") else ""
         aid = ""
         try:
-            if hasattr(ctrl, 'automation_id'):
+            if hasattr(ctrl, "automation_id"):
                 aid = ctrl.automation_id() or ""
         except Exception:
             pass
@@ -225,9 +240,17 @@ def _desc_info(ctrl) -> dict | None:
         # Rectangle for click targeting
         try:
             rect = ctrl.rectangle()
-            info["rect"] = {"left": rect.left, "top": rect.top, "right": rect.right, "bottom": rect.bottom}
+            info["rect"] = {
+                "left": rect.left,
+                "top": rect.top,
+                "right": rect.right,
+                "bottom": rect.bottom,
+            }
             # Center point for easy clicking
-            info["center"] = {"x": (rect.left + rect.right) // 2, "y": (rect.top + rect.bottom) // 2}
+            info["center"] = {
+                "x": (rect.left + rect.right) // 2,
+                "y": (rect.top + rect.bottom) // 2,
+            }
         except Exception:
             pass
 
@@ -238,11 +261,29 @@ def _desc_info(ctrl) -> dict | None:
 
 # Control types that represent interactive or informative elements
 _INTERACTIVE_TYPES = {
-    'Button', 'Edit', 'ComboBox', 'CheckBox', 'RadioButton',
-    'MenuItem', 'ListItem', 'DataItem', 'TabItem', 'TreeItem',
-    'Hyperlink', 'Slider', 'Spinner', 'Static', 'Text',
-    'Document', 'Image', 'ListView', 'Menu', 'MenuBar',
-    'ToolBar', 'Toolbar', 'StatusBar',
+    "Button",
+    "Edit",
+    "ComboBox",
+    "CheckBox",
+    "RadioButton",
+    "MenuItem",
+    "ListItem",
+    "DataItem",
+    "TabItem",
+    "TreeItem",
+    "Hyperlink",
+    "Slider",
+    "Spinner",
+    "Static",
+    "Text",
+    "Document",
+    "Image",
+    "ListView",
+    "Menu",
+    "MenuBar",
+    "ToolBar",
+    "Toolbar",
+    "StatusBar",
 }
 
 
@@ -281,20 +322,24 @@ def scan_app(app_query: str, filter_type: str = None, filter_name: str = None):
 
             controls.append(info)
 
-        _output({
-            "status": "ok",
-            "action": "scan",
-            "app": app_query,
-            "window_title": title,
-            "backend": backend,
-            "count": len(controls),
-            "controls": controls,
-        })
+        _output(
+            {
+                "status": "ok",
+                "action": "scan",
+                "app": app_query,
+                "window_title": title,
+                "backend": backend,
+                "count": len(controls),
+                "controls": controls,
+            }
+        )
     except Exception as e:
         _output({"status": "error", "error": str(e)})
 
 
-def find_control(app_query: str, name: str = None, control_type: str = None, automation_id: str = None):
+def find_control(
+    app_query: str, name: str = None, control_type: str = None, automation_id: str = None
+):
     """Find a specific control by name, type, or automation_id using descendants().
 
     Returns the first matching control with its coordinates.
@@ -310,8 +355,8 @@ def find_control(app_query: str, name: str = None, control_type: str = None, aut
 
         for d in descs:
             try:
-                d_name = d.window_text() if hasattr(d, 'window_text') else ""
-                d_type = d.friendly_class_name() if hasattr(d, 'friendly_class_name') else ""
+                d_name = d.window_text() if hasattr(d, "window_text") else ""
+                d_type = d.friendly_class_name() if hasattr(d, "friendly_class_name") else ""
                 d_aid = ""
                 try:
                     d_aid = d.automation_id() or ""
@@ -361,7 +406,9 @@ def get_tree(app_query: str, depth: int = 3):
         win = app.top_window()
         info = _control_info(win, include_children=True, max_depth=depth)
         info["backend"] = backend
-        _output({"status": "ok", "action": "tree", "app": app_query, "depth": depth, "window": info})
+        _output(
+            {"status": "ok", "action": "tree", "app": app_query, "depth": depth, "window": info}
+        )
     except Exception as e:
         _output({"status": "error", "error": str(e)})
 

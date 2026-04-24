@@ -1,4 +1,5 @@
 """Mouse and keyboard control via pyautogui."""
+
 from __future__ import annotations
 
 import json
@@ -119,9 +120,7 @@ def smooth_move(x: int, y: int, duration: float = 0.5, curve: str = "ease") -> N
     _output({"status": "ok", "action": "smooth_move", "x": x, "y": y, "curve": curve})
 
 
-def draw_path(
-    points: list, duration: float = 1.0, hold_click: bool = True
-) -> None:
+def draw_path(points: list, duration: float = 1.0, hold_click: bool = True) -> None:
     """Draw a smooth Catmull-Rom curve through `points`, optionally dragging.
 
     Args:

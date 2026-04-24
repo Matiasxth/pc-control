@@ -4,6 +4,7 @@ Each module is tagged with any optional deps it hard-requires at import time.
 If a dep is missing we skip — this keeps the test suite green on a minimal
 install (base only) as well as on `.[all]`.
 """
+
 from __future__ import annotations
 
 import importlib
@@ -73,9 +74,7 @@ def test_package_has_version():
 def test_platform_guard():
     """Sanity check: non-Windows runs will skip Windows-only modules."""
     win_only_deps = {"win32clipboard", "pywinauto", "winsdk"}
-    found_any_skippable = any(
-        set(reqs) & win_only_deps for _, reqs in MODULE_REQUIREMENTS
-    )
+    found_any_skippable = any(set(reqs) & win_only_deps for _, reqs in MODULE_REQUIREMENTS)
     assert found_any_skippable, "expected at least one module tagged with Windows-only deps"
     if sys.platform != "win32":
         for dep in win_only_deps:

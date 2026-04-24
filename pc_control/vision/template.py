@@ -1,4 +1,5 @@
 """Template matching — find an image/icon on screen."""
+
 import io
 import json
 import sys
@@ -12,6 +13,7 @@ if sys.stdout.encoding != "utf-8":
 
 try:
     import cv2
+
     HAS_OPENCV = True
 except ImportError:
     HAS_OPENCV = False
@@ -31,6 +33,7 @@ def find_image(template_path: str, screenshot_path: str = None, threshold: float
     # Take screenshot if not provided
     if not screenshot_path:
         from pc_control.screen.capture import screenshot
+
         old_stdout = sys.stdout
         sys.stdout = io.StringIO()
         screenshot()
@@ -75,24 +78,31 @@ def _find_opencv(template_path: str, screenshot_path: str, threshold: float):
         seen.add(key)
 
         confidence = float(result[y, x])
-        matches.append({
-            "x": x, "y": y, "width": tw, "height": th,
-            "center_x": x + tw // 2,
-            "center_y": y + th // 2,
-            "confidence": round(confidence, 3),
-        })
+        matches.append(
+            {
+                "x": x,
+                "y": y,
+                "width": tw,
+                "height": th,
+                "center_x": x + tw // 2,
+                "center_y": y + th // 2,
+                "confidence": round(confidence, 3),
+            }
+        )
 
     matches.sort(key=lambda m: m["confidence"], reverse=True)
     matches = matches[:20]  # Limit results
 
-    _output({
-        "status": "ok",
-        "action": "find_image",
-        "engine": "opencv",
-        "template": template_path,
-        "found": len(matches),
-        "matches": matches,
-    })
+    _output(
+        {
+            "status": "ok",
+            "action": "find_image",
+            "engine": "opencv",
+            "template": template_path,
+            "found": len(matches),
+            "matches": matches,
+        }
+    )
 
 
 def _find_pil(template_path: str, screenshot_path: str, threshold: float):
@@ -125,29 +135,35 @@ def _find_pil(template_path: str, screenshot_path: str, threshold: float):
     # Slide template across screen
     for y in range(0, sh - th, 4):
         for x in range(0, sw - tw, 4):
-            region = screen_arr[y:y + th, x:x + tw]
+            region = screen_arr[y : y + th, x : x + tw]
             region_mean = region.mean()
             region_std = region.std()
             if region_std < 1:
                 continue
             ncc = np.mean((region - region_mean) * (tpl_arr - tpl_mean)) / (region_std * tpl_std)
             if ncc >= threshold:
-                matches.append({
-                    "x": x * scale, "y": y * scale,
-                    "width": tw * scale, "height": th * scale,
-                    "center_x": (x + tw // 2) * scale,
-                    "center_y": (y + th // 2) * scale,
-                    "confidence": round(float(ncc), 3),
-                })
+                matches.append(
+                    {
+                        "x": x * scale,
+                        "y": y * scale,
+                        "width": tw * scale,
+                        "height": th * scale,
+                        "center_x": (x + tw // 2) * scale,
+                        "center_y": (y + th // 2) * scale,
+                        "confidence": round(float(ncc), 3),
+                    }
+                )
 
     matches.sort(key=lambda m: m["confidence"], reverse=True)
     matches = matches[:10]
 
-    _output({
-        "status": "ok",
-        "action": "find_image",
-        "engine": "pil_fallback",
-        "template": template_path,
-        "found": len(matches),
-        "matches": matches,
-    })
+    _output(
+        {
+            "status": "ok",
+            "action": "find_image",
+            "engine": "pil_fallback",
+            "template": template_path,
+            "found": len(matches),
+            "matches": matches,
+        }
+    )

@@ -1,4 +1,5 @@
 """Screen diffing — compare screenshots using PIL + numpy."""
+
 import io
 import json
 import sys
@@ -53,16 +54,18 @@ def diff_screenshots(path1: str, path2: str, threshold: int = 30):
     diff_path = SCREENSHOTS_DIR / f"diff_{ts}.png"
     _save_diff_image(Image.open(p2).convert("RGB"), regions, diff_path)
 
-    _output({
-        "status": "ok",
-        "action": "diff",
-        "change_percent": change_percent,
-        "changed_pixels": changed_pixels,
-        "total_pixels": total_pixels,
-        "regions": len(regions),
-        "bounding_boxes": regions,
-        "diff_image": str(diff_path.resolve()),
-    })
+    _output(
+        {
+            "status": "ok",
+            "action": "diff",
+            "change_percent": change_percent,
+            "changed_pixels": changed_pixels,
+            "total_pixels": total_pixels,
+            "regions": len(regions),
+            "bounding_boxes": regions,
+            "diff_image": str(diff_path.resolve()),
+        }
+    )
 
 
 def diff_screen(reference: str = None):
@@ -90,7 +93,12 @@ def diff_screen(reference: str = None):
         screenshots = sorted(SCREENSHOTS_DIR.glob("screen_*.png"))
         screenshots = [s for s in screenshots if str(s.resolve()) != new_path]
         if not screenshots:
-            _output({"status": "error", "error": "No previous screenshot to compare against. Provide --reference"})
+            _output(
+                {
+                    "status": "error",
+                    "error": "No previous screenshot to compare against. Provide --reference",
+                }
+            )
             return
         ref_path = str(screenshots[-1])
 
@@ -126,7 +134,9 @@ def _find_regions(mask: np.ndarray, min_size: int = 50) -> list:
                 w = max_x - min_x
                 h = max_y - min_y
                 if w >= min_size or h >= min_size:
-                    regions.append({"x": int(min_x), "y": int(min_y), "width": int(w), "height": int(h)})
+                    regions.append(
+                        {"x": int(min_x), "y": int(min_y), "width": int(w), "height": int(h)}
+                    )
 
     return regions
 
@@ -134,6 +144,7 @@ def _find_regions(mask: np.ndarray, min_size: int = 50) -> list:
 def _save_diff_image(img: Image.Image, regions: list, path: Path):
     """Draw red rectangles on changed regions."""
     from PIL import ImageDraw
+
     draw = ImageDraw.Draw(img)
     for r in regions:
         x, y, w, h = r["x"], r["y"], r["width"], r["height"]
