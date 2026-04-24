@@ -1,16 +1,24 @@
-"""Desktop automation command dispatcher — uses daemon when available."""
+"""Desktop automation command dispatcher — uses the daemon when available."""
+
+from __future__ import annotations
 
 import json
 import subprocess
 import sys
+from argparse import Namespace
 
 
-def _output(data: dict):
+def _output(data: dict) -> None:
     print(json.dumps(data, ensure_ascii=False))
 
 
 def _try_daemon(cmd: dict) -> dict | None:
-    """Try sending command to daemon. Returns result or None if daemon not running."""
+    """Send `cmd` to the desktop daemon if it is running.
+
+    Returns the daemon's response dict, or `None` when the daemon is not
+    running (or its socket is unreachable). Callers use the `None` branch to
+    fall back to the synchronous pywinauto path.
+    """
     try:
         from pc_control.desktop.daemon import is_daemon_running, send_command
 
@@ -21,7 +29,8 @@ def _try_daemon(cmd: dict) -> dict | None:
     return None
 
 
-def handle_command(args):
+def handle_command(args: Namespace) -> None:
+    """Dispatch `desktop <subcommand>` to inspector / controller / daemon."""
     cmd = args.desktop_command
 
     if cmd == "daemon":
