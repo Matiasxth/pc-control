@@ -1,9 +1,13 @@
 """Vision module command dispatcher."""
 
+from __future__ import annotations
+
 import sys
+from argparse import Namespace
 
 
-def handle_command(args):
+def handle_command(args: Namespace) -> None:
+    """Dispatch `vision <subcommand>` to diff / detect / template."""
     cmd = args.vision_command
 
     if cmd == "diff":
