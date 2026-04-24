@@ -1,11 +1,15 @@
 """Browser command dispatcher — routes CLI args to browser modules."""
 
+from __future__ import annotations
+
 import sys
+from argparse import Namespace
 
 from pc_control.browser import daemon, navigate
 
 
-def handle_command(args):
+def handle_command(args: Namespace) -> None:
+    """Dispatch `browser <subcommand>` to daemon / navigate / recording."""
     cmd = args.browser_command
 
     # Daemon commands
