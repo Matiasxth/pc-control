@@ -7,6 +7,7 @@ Usage:
 
 Windows only (pywin32).
 """
+
 from __future__ import annotations
 
 import argparse
@@ -32,12 +33,8 @@ def set_clipboard(text: str) -> dict:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument(
-        "--interval", type=float, default=5.0, help="Seconds between updates"
-    )
-    parser.add_argument(
-        "--once", action="store_true", help="Update once and exit"
-    )
+    parser.add_argument("--interval", type=float, default=5.0, help="Seconds between updates")
+    parser.add_argument("--once", action="store_true", help="Update once and exit")
     args = parser.parse_args()
 
     try:

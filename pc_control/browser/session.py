@@ -1,4 +1,5 @@
 """Browser session — connect/disconnect Playwright to persistent CDP browser."""
+
 import json
 from contextlib import contextmanager
 

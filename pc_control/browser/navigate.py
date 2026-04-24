@@ -1,4 +1,5 @@
 """Browser navigation — goto, click, fill, text, eval, screenshot, etc."""
+
 import json
 from datetime import datetime
 from pathlib import Path
@@ -30,11 +31,24 @@ def tabs():
 def switch_tab(index):
     with browser_connection() as (browser, ctx, page):
         if index < 0 or index >= len(ctx.pages):
-            _output({"status": "error", "error": f"Tab index {index} out of range (0-{len(ctx.pages)-1})"})
+            _output(
+                {
+                    "status": "error",
+                    "error": f"Tab index {index} out of range (0-{len(ctx.pages) - 1})",
+                }
+            )
             return
         target = ctx.pages[index]
         target.bring_to_front()
-        _output({"status": "ok", "action": "switch_tab", "index": index, "url": target.url, "title": target.title()})
+        _output(
+            {
+                "status": "ok",
+                "action": "switch_tab",
+                "index": index,
+                "url": target.url,
+                "title": target.title(),
+            }
+        )
 
 
 def close_tab(index):
@@ -87,7 +101,15 @@ def html(selector):
 def attr(selector, attribute):
     with browser_connection() as (browser, ctx, page):
         value = page.get_attribute(selector, attribute, timeout=10000)
-        _output({"status": "ok", "action": "attr", "selector": selector, "attribute": attribute, "value": value})
+        _output(
+            {
+                "status": "ok",
+                "action": "attr",
+                "selector": selector,
+                "attribute": attribute,
+                "value": value,
+            }
+        )
 
 
 def evaluate(js):
@@ -112,13 +134,15 @@ def screenshot(selector=None, output=None):
         else:
             page.screenshot(path=str(output_path), full_page=False)
 
-        _output({
-            "status": "ok",
-            "action": "browser_screenshot",
-            "path": str(output_path.resolve()),
-            "url": page.url,
-            "title": page.title(),
-        })
+        _output(
+            {
+                "status": "ok",
+                "action": "browser_screenshot",
+                "path": str(output_path.resolve()),
+                "url": page.url,
+                "title": page.title(),
+            }
+        )
 
 
 def wait_for(selector, timeout=10):
@@ -137,6 +161,7 @@ def load_storage(path):
     with browser_connection() as (browser, ctx, page):
         # Load cookies from storage state file
         import json as json_mod
+
         storage = json_mod.loads(Path(path).read_text())
         if "cookies" in storage:
             ctx.add_cookies(storage["cookies"])

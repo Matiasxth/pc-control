@@ -1,4 +1,5 @@
 """Workflow engine — predefined action sequences triggered by a single command."""
+
 import json
 import os
 import subprocess
@@ -14,7 +15,10 @@ def _run(cmd: str, silent=True):
     """Run a pc_control command and return parsed result."""
     r = subprocess.run(
         [sys.executable, "-m", "pc_control"] + cmd.split(),
-        capture_output=True, text=True, encoding="utf-8", errors="replace",
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     try:
         return json.loads(r.stdout)
@@ -37,55 +41,70 @@ def _steps(name, actions):
             results.append({"step": desc, "status": r.get("status", "?")})
 
     ok = sum(1 for r in results if r["status"] == "ok")
-    _output({
-        "status": "ok",
-        "action": "workflow",
-        "name": name,
-        "steps_total": len(results),
-        "steps_ok": ok,
-        "results": results,
-    })
+    _output(
+        {
+            "status": "ok",
+            "action": "workflow",
+            "name": name,
+            "steps_total": len(results),
+            "steps_ok": ok,
+            "results": results,
+        }
+    )
 
 
 # ── Predefined Workflows ──────────────────────────────
 
+
 def workflow_work():
     """Set up a coding work environment."""
-    _steps("work", [
-        ("Set volume to 30%", "audio volume 30"),
-        ("Open VS Code", "app open vscode"),
-        ("Open Chrome", "app open chrome"),
-        ("Play lo-fi music", "desktop play spotify lofi beats study"),
-        ("Wait for apps", "sleep:3"),
-        ("Snap terminal left", "windows snap conversation left"),
-        ("Snap Chrome right", "windows snap Chrome right"),
-    ])
+    _steps(
+        "work",
+        [
+            ("Set volume to 30%", "audio volume 30"),
+            ("Open VS Code", "app open vscode"),
+            ("Open Chrome", "app open chrome"),
+            ("Play lo-fi music", "desktop play spotify lofi beats study"),
+            ("Wait for apps", "sleep:3"),
+            ("Snap terminal left", "windows snap conversation left"),
+            ("Snap Chrome right", "windows snap Chrome right"),
+        ],
+    )
 
 
 def workflow_relax():
     """Chill mode — music + close work apps."""
-    _steps("relax", [
-        ("Set volume to 50%", "audio volume 50"),
-        ("Play chill music", "desktop play spotify chill vibes playlist"),
-        ("Maximize Spotify", "windows snap Spotify maximize"),
-    ])
+    _steps(
+        "relax",
+        [
+            ("Set volume to 50%", "audio volume 50"),
+            ("Play chill music", "desktop play spotify chill vibes playlist"),
+            ("Maximize Spotify", "windows snap Spotify maximize"),
+        ],
+    )
 
 
 def workflow_present():
     """Presentation mode — clean desktop, mute, maximize main app."""
-    _steps("present", [
-        ("Mute audio", "audio mute"),
-        ("Save current layout", "windows layout save pre-present"),
-        ("Maximize Chrome", "windows snap Chrome maximize"),
-    ])
+    _steps(
+        "present",
+        [
+            ("Mute audio", "audio mute"),
+            ("Save current layout", "windows layout save pre-present"),
+            ("Maximize Chrome", "windows snap Chrome maximize"),
+        ],
+    )
 
 
 def workflow_reset():
     """Reset — restore saved layout, unmute."""
-    _steps("reset", [
-        ("Unmute audio", "audio unmute"),
-        ("Load saved layout", "windows layout load pre-present"),
-    ])
+    _steps(
+        "reset",
+        [
+            ("Unmute audio", "audio unmute"),
+            ("Load saved layout", "windows layout load pre-present"),
+        ],
+    )
 
 
 _WORKFLOWS = {
@@ -100,11 +119,13 @@ def run_workflow(name: str):
     if name in _WORKFLOWS:
         _WORKFLOWS[name]()
     else:
-        _output({
-            "status": "error",
-            "error": f"Unknown workflow: {name}",
-            "available": list(_WORKFLOWS.keys()),
-        })
+        _output(
+            {
+                "status": "error",
+                "error": f"Unknown workflow: {name}",
+                "available": list(_WORKFLOWS.keys()),
+            }
+        )
 
 
 def list_workflows():

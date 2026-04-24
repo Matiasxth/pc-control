@@ -1,4 +1,5 @@
 """Email client — send via SMTP, read via IMAP."""
+
 import email
 import imaplib
 import io
@@ -39,8 +40,14 @@ def configure(smtp_host, smtp_port, imap_host, imap_port, username, password, us
         "use_tls": use_tls,
     }
     EMAIL_CONFIG.write_text(json.dumps(cfg, indent=2))
-    _output({"status": "ok", "action": "email_configure", "username": username,
-              "warning": "Credentials stored in plaintext at " + str(EMAIL_CONFIG)})
+    _output(
+        {
+            "status": "ok",
+            "action": "email_configure",
+            "username": username,
+            "warning": "Credentials stored in plaintext at " + str(EMAIL_CONFIG),
+        }
+    )
 
 
 def send_email(to: str, subject: str, body: str):
@@ -109,16 +116,20 @@ def read_inbox(limit=20, unread_only=True):
             else:
                 body_preview = msg.get_payload(decode=True).decode(errors="replace")[:200]
 
-            messages.append({
-                "id": mid.decode(),
-                "from": msg.get("From", ""),
-                "to": msg.get("To", ""),
-                "subject": msg.get("Subject", ""),
-                "date": msg.get("Date", ""),
-                "body_preview": body_preview.strip(),
-            })
+            messages.append(
+                {
+                    "id": mid.decode(),
+                    "from": msg.get("From", ""),
+                    "to": msg.get("To", ""),
+                    "subject": msg.get("Subject", ""),
+                    "date": msg.get("Date", ""),
+                    "body_preview": body_preview.strip(),
+                }
+            )
 
         mail.logout()
-        _output({"status": "ok", "action": "email_inbox", "count": len(messages), "messages": messages})
+        _output(
+            {"status": "ok", "action": "email_inbox", "count": len(messages), "messages": messages}
+        )
     except Exception as e:
         _output({"status": "error", "error": str(e)})

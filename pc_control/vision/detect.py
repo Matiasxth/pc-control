@@ -1,4 +1,5 @@
 """Element and text detection — find text/elements on screen with coordinates."""
+
 import asyncio
 import io
 import json
@@ -41,22 +42,30 @@ async def _ocr_with_bounds_async(image_path: str, language: str = "es") -> dict:
         words = []
         for word in line.words:
             rect = word.bounding_rect
-            words.append({
-                "text": word.text,
-                "bounds": {"x": int(rect.x), "y": int(rect.y),
-                           "width": int(rect.width), "height": int(rect.height)},
-            })
+            words.append(
+                {
+                    "text": word.text,
+                    "bounds": {
+                        "x": int(rect.x),
+                        "y": int(rect.y),
+                        "width": int(rect.width),
+                        "height": int(rect.height),
+                    },
+                }
+            )
         # Line bounds from first/last word
         if words:
             lx = words[0]["bounds"]["x"]
             ly = min(w["bounds"]["y"] for w in words)
             lw = words[-1]["bounds"]["x"] + words[-1]["bounds"]["width"] - lx
             lh = max(w["bounds"]["y"] + w["bounds"]["height"] for w in words) - ly
-            lines.append({
-                "text": " ".join(w["text"] for w in words),
-                "bounds": {"x": lx, "y": ly, "width": lw, "height": lh},
-                "words": words,
-            })
+            lines.append(
+                {
+                    "text": " ".join(w["text"] for w in words),
+                    "bounds": {"x": lx, "y": ly, "width": lw, "height": lh},
+                    "words": words,
+                }
+            )
 
     return {"text": result.text, "lines": lines}
 
@@ -65,6 +74,7 @@ def find_text(query: str, region=None, window=None, language="es"):
     """Find text on screen and return its coordinates."""
     # Take screenshot
     from pc_control.screen.capture import screenshot
+
     old_stdout = sys.stdout
     sys.stdout = io.StringIO()
     screenshot(region=region, window=window)
@@ -91,38 +101,45 @@ def find_text(query: str, region=None, window=None, language="es"):
 
     for line in ocr_result["lines"]:
         if query_lower in line["text"].lower():
-            matches.append({
-                "text": line["text"],
-                "bounds": line["bounds"],
-                "center_x": line["bounds"]["x"] + line["bounds"]["width"] // 2,
-                "center_y": line["bounds"]["y"] + line["bounds"]["height"] // 2,
-            })
+            matches.append(
+                {
+                    "text": line["text"],
+                    "bounds": line["bounds"],
+                    "center_x": line["bounds"]["x"] + line["bounds"]["width"] // 2,
+                    "center_y": line["bounds"]["y"] + line["bounds"]["height"] // 2,
+                }
+            )
 
         # Also check individual words
         for word in line["words"]:
             if query_lower in word["text"].lower() and not any(
                 m["text"] == word["text"] for m in matches
             ):
-                matches.append({
-                    "text": word["text"],
-                    "bounds": word["bounds"],
-                    "center_x": word["bounds"]["x"] + word["bounds"]["width"] // 2,
-                    "center_y": word["bounds"]["y"] + word["bounds"]["height"] // 2,
-                })
+                matches.append(
+                    {
+                        "text": word["text"],
+                        "bounds": word["bounds"],
+                        "center_x": word["bounds"]["x"] + word["bounds"]["width"] // 2,
+                        "center_y": word["bounds"]["y"] + word["bounds"]["height"] // 2,
+                    }
+                )
 
-    _output({
-        "status": "ok",
-        "action": "find_text",
-        "query": query,
-        "found": len(matches),
-        "matches": matches,
-        "screenshot": image_path,
-    })
+    _output(
+        {
+            "status": "ok",
+            "action": "find_text",
+            "query": query,
+            "found": len(matches),
+            "matches": matches,
+            "screenshot": image_path,
+        }
+    )
 
 
 def detect_elements(region=None, window=None, language="es"):
     """Detect UI elements on screen using OCR bounding boxes."""
     from pc_control.screen.capture import screenshot
+
     old_stdout = sys.stdout
     sys.stdout = io.StringIO()
     screenshot(region=region, window=window)
@@ -160,18 +177,22 @@ def detect_elements(region=None, window=None, language="es"):
         else:
             elem_type = "text"
 
-        elements.append({
-            "text": text,
-            "type": elem_type,
-            "bounds": b,
-            "center_x": b["x"] + b["width"] // 2,
-            "center_y": b["y"] + b["height"] // 2,
-        })
+        elements.append(
+            {
+                "text": text,
+                "type": elem_type,
+                "bounds": b,
+                "center_x": b["x"] + b["width"] // 2,
+                "center_y": b["y"] + b["height"] // 2,
+            }
+        )
 
-    _output({
-        "status": "ok",
-        "action": "elements",
-        "count": len(elements),
-        "elements": elements,
-        "screenshot": image_path,
-    })
+    _output(
+        {
+            "status": "ok",
+            "action": "elements",
+            "count": len(elements),
+            "elements": elements,
+            "screenshot": image_path,
+        }
+    )

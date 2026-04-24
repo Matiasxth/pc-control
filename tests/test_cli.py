@@ -5,6 +5,7 @@ tree builds and that every top-level module exposes `--help` without crashing.
 Nothing here requires platform-specific dependencies (pywin32, pywinauto,
 winsdk), which are only imported when a command actually runs.
 """
+
 from __future__ import annotations
 
 import subprocess

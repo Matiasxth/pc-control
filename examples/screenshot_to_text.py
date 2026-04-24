@@ -8,6 +8,7 @@ Usage:
 
 Requires the `[ocr]` extra: `pip install -e ".[ocr]"`.
 """
+
 from __future__ import annotations
 
 import argparse

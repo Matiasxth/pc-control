@@ -1,4 +1,5 @@
 """Chat module command dispatcher."""
+
 import sys
 
 

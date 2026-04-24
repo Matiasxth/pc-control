@@ -9,6 +9,7 @@ Usage:
 
 Requires the `[browser]` extra and `python -m playwright install chromium`.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -46,9 +47,7 @@ def ensure_browser_running() -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("url", help="URL to navigate to")
-    parser.add_argument(
-        "--selector", default="h1", help="CSS selector to extract (default: h1)"
-    )
+    parser.add_argument("--selector", default="h1", help="CSS selector to extract (default: h1)")
     args = parser.parse_args()
 
     try:

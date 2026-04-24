@@ -1,4 +1,5 @@
 """Audio control — volume and mute via pycaw or media keys fallback."""
+
 import json
 import sys
 
@@ -6,8 +7,10 @@ import sys
 def _output(data: dict):
     print(json.dumps(data, ensure_ascii=False))
 
+
 try:
     from pycaw.pycaw import AudioUtilities
+
     HAS_PYCAW = True
 except ImportError:
     HAS_PYCAW = False
@@ -36,10 +39,11 @@ def set_volume(level: int):
     else:
         # Fallback: media keys
         import pyautogui
+
         for _ in range(50):
-            pyautogui.press('volumedown')
+            pyautogui.press("volumedown")
         for _ in range(level // 2):
-            pyautogui.press('volumeup')
+            pyautogui.press("volumeup")
         _output({"status": "ok", "action": "set_volume", "volume": level, "method": "media_keys"})
 
 
@@ -50,7 +54,8 @@ def mute():
         _output({"status": "ok", "action": "mute"})
     else:
         import pyautogui
-        pyautogui.press('volumemute')
+
+        pyautogui.press("volumemute")
         _output({"status": "ok", "action": "mute", "method": "media_key"})
 
 
@@ -61,7 +66,8 @@ def unmute():
         _output({"status": "ok", "action": "unmute"})
     else:
         import pyautogui
-        pyautogui.press('volumemute')
+
+        pyautogui.press("volumemute")
         _output({"status": "ok", "action": "unmute", "method": "media_key"})
 
 
@@ -73,7 +79,8 @@ def toggle_mute():
         _output({"status": "ok", "action": "toggle_mute", "muted": not bool(current)})
     else:
         import pyautogui
-        pyautogui.press('volumemute')
+
+        pyautogui.press("volumemute")
         _output({"status": "ok", "action": "toggle_mute", "method": "media_key"})
 
 

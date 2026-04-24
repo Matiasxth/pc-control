@@ -3,6 +3,7 @@
 Runs as a background process, accepts commands via local TCP socket.
 Eliminates cold-start overhead: connect once, interact instantly.
 """
+
 import io
 import json
 import os
@@ -72,6 +73,7 @@ class AppConnection:
         """Check if the app process is still running."""
         try:
             import psutil
+
             return psutil.pid_exists(self.pid)
         except Exception:
             return True  # assume alive if can't check
@@ -100,6 +102,7 @@ class DesktopDaemon:
 
             # Create new connection using inspector's _connect
             from pc_control.desktop.inspector import _connect
+
             app, backend = _connect(app_query)
             if not app:
                 raise ConnectionError(f"Cannot connect to '{app_query}'")
@@ -122,7 +125,11 @@ class DesktopDaemon:
 
         try:
             if action == "ping":
-                return {"status": "ok", "action": "pong", "connections": list(self._connections.keys())}
+                return {
+                    "status": "ok",
+                    "action": "pong",
+                    "connections": list(self._connections.keys()),
+                }
 
             if action == "play":
                 return self._handle_play(app_query, cmd)
@@ -191,8 +198,8 @@ class DesktopDaemon:
 
         for d in descs:
             try:
-                d_name = d.window_text() if hasattr(d, 'window_text') else ""
-                d_type = d.friendly_class_name() if hasattr(d, 'friendly_class_name') else ""
+                d_name = d.window_text() if hasattr(d, "window_text") else ""
+                d_type = d.friendly_class_name() if hasattr(d, "friendly_class_name") else ""
                 if "Button" not in d_type or "Reproducir" not in d_name:
                     continue
                 name_lower = d_name.lower()
@@ -231,7 +238,7 @@ class DesktopDaemon:
             "action": "play",
             "app": app_query,
             "query": query,
-            "track": play_ctrl.window_text() if hasattr(play_ctrl, 'window_text') else "",
+            "track": play_ctrl.window_text() if hasattr(play_ctrl, "window_text") else "",
             "method": click_method,
         }
 
@@ -304,6 +311,7 @@ class DesktopDaemon:
         if control_path:
             # Legacy path-based
             from pc_control.desktop.inspector import _navigate_to_control
+
             if foreground:
                 conn.ensure_foreground()
             win = conn.get_window()
@@ -333,12 +341,17 @@ class DesktopDaemon:
             "action": "desktop_click",
             "app": app_query,
             "method": click_method,
-            "control_type": ctrl.friendly_class_name() if hasattr(ctrl, 'friendly_class_name') else "unknown",
-            "control_name": ctrl.window_text() if hasattr(ctrl, 'window_text') else "",
+            "control_type": ctrl.friendly_class_name()
+            if hasattr(ctrl, "friendly_class_name")
+            else "unknown",
+            "control_name": ctrl.window_text() if hasattr(ctrl, "window_text") else "",
         }
         try:
             rect = ctrl.rectangle()
-            result["clicked_at"] = {"x": (rect.left + rect.right) // 2, "y": (rect.top + rect.bottom) // 2}
+            result["clicked_at"] = {
+                "x": (rect.left + rect.right) // 2,
+                "y": (rect.top + rect.bottom) // 2,
+            }
         except Exception:
             pass
 
@@ -359,6 +372,7 @@ class DesktopDaemon:
 
         if control_path:
             from pc_control.desktop.inspector import _navigate_to_control
+
             if foreground:
                 conn.ensure_foreground()
             win = conn.get_window()
@@ -391,9 +405,10 @@ class DesktopDaemon:
                 time.sleep(0.1)
                 # Select all and clear before typing
                 import pyautogui
-                pyautogui.hotkey('ctrl', 'a')
+
+                pyautogui.hotkey("ctrl", "a")
                 time.sleep(0.05)
-                pyautogui.press('delete')
+                pyautogui.press("delete")
                 time.sleep(0.05)
                 pyautogui.write(text, interval=0.02)
                 # Restore previous state if was minimized
@@ -410,7 +425,7 @@ class DesktopDaemon:
             "status": "ok",
             "action": "desktop_type",
             "app": app_query,
-            "control_name": ctrl.window_text() if hasattr(ctrl, 'window_text') else "",
+            "control_name": ctrl.window_text() if hasattr(ctrl, "window_text") else "",
             "length": len(text),
         }
 
@@ -419,8 +434,8 @@ class DesktopDaemon:
         descs = conn.get_descendants()
         for d in descs:
             try:
-                d_name = d.window_text() if hasattr(d, 'window_text') else ""
-                d_type = d.friendly_class_name() if hasattr(d, 'friendly_class_name') else ""
+                d_name = d.window_text() if hasattr(d, "window_text") else ""
+                d_type = d.friendly_class_name() if hasattr(d, "friendly_class_name") else ""
 
                 match = True
                 if name and name.lower() not in d_name.lower():
@@ -437,11 +452,15 @@ class DesktopDaemon:
     def _desc_info(ctrl) -> dict | None:
         """Extract compact info from a control."""
         try:
-            ct = ctrl.friendly_class_name() if hasattr(ctrl, 'friendly_class_name') else type(ctrl).__name__
-            title = ctrl.window_text() if hasattr(ctrl, 'window_text') else ""
+            ct = (
+                ctrl.friendly_class_name()
+                if hasattr(ctrl, "friendly_class_name")
+                else type(ctrl).__name__
+            )
+            title = ctrl.window_text() if hasattr(ctrl, "window_text") else ""
             aid = ""
             try:
-                if hasattr(ctrl, 'automation_id'):
+                if hasattr(ctrl, "automation_id"):
                     aid = ctrl.automation_id() or ""
             except Exception:
                 pass
@@ -455,8 +474,16 @@ class DesktopDaemon:
 
             try:
                 rect = ctrl.rectangle()
-                info["rect"] = {"left": rect.left, "top": rect.top, "right": rect.right, "bottom": rect.bottom}
-                info["center"] = {"x": (rect.left + rect.right) // 2, "y": (rect.top + rect.bottom) // 2}
+                info["rect"] = {
+                    "left": rect.left,
+                    "top": rect.top,
+                    "right": rect.right,
+                    "bottom": rect.bottom,
+                }
+                info["center"] = {
+                    "x": (rect.left + rect.right) // 2,
+                    "y": (rect.top + rect.bottom) // 2,
+                }
             except Exception:
                 pass
 
@@ -478,13 +505,17 @@ class DesktopDaemon:
         # Write PID file
         DAEMON_PID_FILE.write_text(str(os.getpid()))
 
-        print(json.dumps({
-            "status": "ok",
-            "action": "daemon_started",
-            "pid": os.getpid(),
-            "host": DAEMON_HOST,
-            "port": DAEMON_PORT,
-        }))
+        print(
+            json.dumps(
+                {
+                    "status": "ok",
+                    "action": "daemon_started",
+                    "pid": os.getpid(),
+                    "host": DAEMON_HOST,
+                    "port": DAEMON_PORT,
+                }
+            )
+        )
         sys.stdout.flush()
 
         try:
@@ -542,6 +573,7 @@ class DesktopDaemon:
 
 
 # ── Client ─────────────────────────────────────────────
+
 
 def send_command(cmd: dict, timeout: float = 30.0) -> dict:
     """Send a command to the daemon and return the result."""

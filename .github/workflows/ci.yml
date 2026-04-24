@@ -25,6 +25,9 @@ jobs:
       - name: Ruff check
         run: ruff check pc_control examples tests
 
+      - name: Ruff format check
+        run: ruff format --check pc_control examples tests
+
   compile:
     name: Compile (py-syntax)
     runs-on: windows-latest

@@ -7,6 +7,7 @@ this example stays single-purpose.
 Usage:
     python examples/focus_or_launch.py "Visual Studio Code"
 """
+
 from __future__ import annotations
 
 import argparse

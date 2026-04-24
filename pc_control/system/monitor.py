@@ -1,4 +1,5 @@
 """System monitoring — CPU, RAM, disk, processes via psutil."""
+
 from __future__ import annotations
 
 import json
@@ -67,9 +68,7 @@ def list_processes(
                     "name": info["name"],
                     "cpu_percent": info["cpu_percent"] or 0,
                     "memory_mb": (
-                        round(info["memory_info"].rss / (1024**2), 1)
-                        if info["memory_info"]
-                        else 0
+                        round(info["memory_info"].rss / (1024**2), 1) if info["memory_info"] else 0
                     ),
                     "status": info["status"],
                 }

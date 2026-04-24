@@ -1,4 +1,5 @@
 """Browser recording — record user actions via background daemon."""
+
 import json
 import subprocess
 import sys
@@ -44,9 +45,12 @@ def start_recording(url=None, session_name=None):
 
     from pc_control.browser.daemon import _is_alive
     from pc_control.browser.daemon import _load_state as load_browser_state
+
     browser_state = load_browser_state()
     if not browser_state or not _is_alive(browser_state["pid"]):
-        _output({"status": "error", "error": "Browser not running. Run 'browser start --headed' first."})
+        _output(
+            {"status": "error", "error": "Browser not running. Run 'browser start --headed' first."}
+        )
         return
 
     port = browser_state["port"]
@@ -87,21 +91,25 @@ def start_recording(url=None, session_name=None):
         _output({"status": "error", "error": f"Error starting daemon: {e}"})
         return
 
-    _save_state({
-        "session_name": session_name,
-        "daemon_pid": proc.pid,
-        "events_file": str(events_file),
-        "started_at": datetime.now().isoformat(),
-        "url": url,
-    })
+    _save_state(
+        {
+            "session_name": session_name,
+            "daemon_pid": proc.pid,
+            "events_file": str(events_file),
+            "started_at": datetime.now().isoformat(),
+            "url": url,
+        }
+    )
 
-    _output({
-        "status": "ok",
-        "action": "record_start",
-        "session": session_name,
-        "daemon_pid": proc.pid,
-        "message": "Recording. Interact with the browser, then run 'browser record stop'.",
-    })
+    _output(
+        {
+            "status": "ok",
+            "action": "record_start",
+            "session": session_name,
+            "daemon_pid": proc.pid,
+            "message": "Recording. Interact with the browser, then run 'browser record stop'.",
+        }
+    )
 
 
 def stop_recording(output_path=None):
@@ -139,7 +147,9 @@ def stop_recording(output_path=None):
 
     if not actions:
         _clear_state()
-        _output({"status": "error", "error": "No actions recorded. Did you interact with the browser?"})
+        _output(
+            {"status": "error", "error": "No actions recorded. Did you interact with the browser?"}
+        )
         return
 
     # Generate Python script
@@ -156,48 +166,50 @@ def stop_recording(output_path=None):
         events_file.unlink()
     _clear_state()
 
-    _output({
-        "status": "ok",
-        "action": "record_stop",
-        "session": session_name,
-        "actions_count": len(actions),
-        "script": str(output_file.resolve()),
-        "raw_data": str(raw_file.resolve()),
-    })
+    _output(
+        {
+            "status": "ok",
+            "action": "record_stop",
+            "session": session_name,
+            "actions_count": len(actions),
+            "script": str(output_file.resolve()),
+            "raw_data": str(raw_file.resolve()),
+        }
+    )
 
 
 def _generate_script(actions: list, state: dict) -> str:
     """Transform recorded actions into a Playwright Python script."""
     lines = [
         f'"""Recorded browser actions — {state.get("started_at", "")}',
-        f'Start URL: {state.get("url", "N/A")}',
-        f'Actions: {len(actions)}',
+        f"Start URL: {state.get('url', 'N/A')}",
+        f"Actions: {len(actions)}",
         '"""',
-        'from playwright.sync_api import sync_playwright',
-        '',
-        '',
-        'def run(page=None):',
+        "from playwright.sync_api import sync_playwright",
+        "",
+        "",
+        "def run(page=None):",
         '    """Run recorded actions. Pass a page object or run standalone."""',
-        '    standalone = page is None',
-        '    pw = None',
-        '    if standalone:',
-        '        pw = sync_playwright().start()',
-        '        browser = pw.chromium.launch(headless=False)',
-        '        page = browser.new_page()',
-        '',
+        "    standalone = page is None",
+        "    pw = None",
+        "    if standalone:",
+        "        pw = sync_playwright().start()",
+        "        browser = pw.chromium.launch(headless=False)",
+        "        page = browser.new_page()",
+        "",
     ]
 
     start_url = state.get("url")
     if start_url:
         lines.append(f'    page.goto("{start_url}", wait_until="domcontentloaded")')
-        lines.append('')
+        lines.append("")
 
     prev_timestamp = 0
     for action in actions:
         ts = action.get("timestamp", 0)
         gap = ts - prev_timestamp
         if gap > 1000:
-            lines.append(f'    page.wait_for_timeout({min(gap, 5000)})')
+            lines.append(f"    page.wait_for_timeout({min(gap, 5000)})")
         prev_timestamp = ts
 
         atype = action.get("type")
@@ -210,7 +222,9 @@ def _generate_script(actions: list, state: dict) -> str:
             value = action.get("value", "")
             val_escaped = value.replace('"', '\\"')
             if action.get("inputType") == "password":
-                lines.append(f'    page.fill("{sel_escaped}", "***")  # PASSWORD — replace with actual value')
+                lines.append(
+                    f'    page.fill("{sel_escaped}", "***")  # PASSWORD — replace with actual value'
+                )
             else:
                 lines.append(f'    page.fill("{sel_escaped}", "{val_escaped}")')
         elif atype == "select":
@@ -223,28 +237,31 @@ def _generate_script(actions: list, state: dict) -> str:
             lines.append(f'    page.keyboard.press("{action.get("key", "")}")')
         elif atype == "navigation":
             to_url = action.get("to", "")
-            lines.append(f'    # Navigation: {to_url}')
+            lines.append(f"    # Navigation: {to_url}")
             path = _url_pattern(to_url)
             lines.append(f'    page.wait_for_url("**{path}**", timeout=10000)')
 
-    lines.extend([
-        '',
-        '    if standalone:',
-        '        input("Press Enter to close browser...")',
-        '        browser.close()',
-        '        pw.stop()',
-        '',
-        '',
-        'if __name__ == "__main__":',
-        '    run()',
-        '',
-    ])
+    lines.extend(
+        [
+            "",
+            "    if standalone:",
+            '        input("Press Enter to close browser...")',
+            "        browser.close()",
+            "        pw.stop()",
+            "",
+            "",
+            'if __name__ == "__main__":',
+            "    run()",
+            "",
+        ]
+    )
 
-    return '\n'.join(lines)
+    return "\n".join(lines)
 
 
 def _url_pattern(url: str) -> str:
     from urllib.parse import urlparse
+
     parsed = urlparse(url)
     return parsed.path or "/"
 
@@ -252,12 +269,21 @@ def _url_pattern(url: str) -> str:
 def list_recordings():
     recordings = []
     for f in sorted(RECORDINGS_DIR.glob("*.py")):
-        recordings.append({
-            "name": f.stem,
-            "path": str(f.resolve()),
-            "size_kb": round(f.stat().st_size / 1024, 1),
-        })
-    _output({"status": "ok", "action": "record_list", "count": len(recordings), "recordings": recordings})
+        recordings.append(
+            {
+                "name": f.stem,
+                "path": str(f.resolve()),
+                "size_kb": round(f.stat().st_size / 1024, 1),
+            }
+        )
+    _output(
+        {
+            "status": "ok",
+            "action": "record_list",
+            "count": len(recordings),
+            "recordings": recordings,
+        }
+    )
 
 
 def play_recording(script_path, slow=0):
@@ -275,6 +301,7 @@ def play_recording(script_path, slow=0):
             page.set_default_timeout(slow * 2)
 
         import importlib.util
+
         spec = importlib.util.spec_from_file_location("recording", str(script_file))
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)

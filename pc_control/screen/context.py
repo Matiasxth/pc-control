@@ -1,4 +1,5 @@
 """Screen context — fast text-based screen summary without screenshots."""
+
 import io
 import json
 import sys
@@ -13,6 +14,7 @@ try:
     import win32con
     import win32gui
     import win32process
+
     HAS_WIN32 = True
 except ImportError:
     HAS_WIN32 = False
@@ -84,28 +86,33 @@ def get_context():
         if w <= 0 and h <= 0 and state != "minimized":
             return True
 
-        windows.append({
-            "title": title[:80],
-            "process": proc,
-            "state": state,
-        })
+        windows.append(
+            {
+                "title": title[:80],
+                "process": proc,
+                "state": state,
+            }
+        )
         return True
 
     win32gui.EnumWindows(callback, None)
 
     # Work area
     from ctypes import wintypes
+
     work_rect = wintypes.RECT()
     ctypes.windll.user32.SystemParametersInfoW(0x0030, 0, ctypes.byref(work_rect), 0)
 
-    _output({
-        "status": "ok",
-        "action": "context",
-        "active_window": active,
-        "visible_windows": windows,
-        "window_count": len(windows),
-        "work_area": {
-            "width": work_rect.right - work_rect.left,
-            "height": work_rect.bottom - work_rect.top,
-        },
-    })
+    _output(
+        {
+            "status": "ok",
+            "action": "context",
+            "active_window": active,
+            "visible_windows": windows,
+            "window_count": len(windows),
+            "work_area": {
+                "width": work_rect.right - work_rect.left,
+                "height": work_rect.bottom - work_rect.top,
+            },
+        }
+    )

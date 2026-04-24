@@ -1,4 +1,5 @@
 """HTTP webhook receiver — daemon that logs incoming POST requests."""
+
 import io
 import json
 import subprocess
@@ -75,15 +76,25 @@ def start_webhook(port=8765):
     """Start webhook server as background daemon."""
     state = _load_state()
     if state and psutil.pid_exists(state.get("pid", 0)):
-        _output({"status": "ok", "action": "webhook_start", "message": "Already running",
-                 "port": state["port"], "pid": state["pid"]})
+        _output(
+            {
+                "status": "ok",
+                "action": "webhook_start",
+                "message": "Already running",
+                "port": state["port"],
+                "pid": state["pid"],
+            }
+        )
         return
 
     CREATE_NEW_PROCESS_GROUP = 0x00000200
     DETACHED_PROCESS = 0x00000008
     proc = subprocess.Popen(
-        [sys.executable, "-c",
-         f"from pc_control.api.webhooks import _run_server; _run_server({port})"],
+        [
+            sys.executable,
+            "-c",
+            f"from pc_control.api.webhooks import _run_server; _run_server({port})",
+        ],
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,
         creationflags=CREATE_NEW_PROCESS_GROUP | DETACHED_PROCESS,
@@ -149,10 +160,12 @@ def list_events(limit=50):
 def _save_state(state):
     WEBHOOK_STATE.write_text(json.dumps(state, indent=2))
 
+
 def _load_state():
     if WEBHOOK_STATE.exists():
         return json.loads(WEBHOOK_STATE.read_text())
     return None
+
 
 def _clear_state():
     if WEBHOOK_STATE.exists():
