@@ -15,14 +15,36 @@ from pc_control.config import (
     DEFAULT_CDP_PORT,
 )
 
-# Chromium from Playwright installation
-CHROMIUM_EXE = (
-    Path(os.environ.get("LOCALAPPDATA", ""))
-    / "ms-playwright"
-    / "chromium-1208"
-    / "chrome-win64"
-    / "chrome.exe"
-)
+
+def _playwright_browsers_dir() -> Path:
+    """Return the directory where Playwright stores its browsers.
+
+    Honors ``PLAYWRIGHT_BROWSERS_PATH`` the same way Playwright does,
+    falling back to the default ``%LOCALAPPDATA%\\ms-playwright``.
+    """
+    custom = os.environ.get("PLAYWRIGHT_BROWSERS_PATH")
+    if custom and custom != "0":
+        return Path(custom)
+    return Path(os.environ.get("LOCALAPPDATA", "")) / "ms-playwright"
+
+
+def find_chromium_exe(browsers_dir: Path | None = None) -> Path | None:
+    """Locate the newest Playwright-installed Chromium executable.
+
+    Playwright installs Chromium into ``chromium-<revision>`` folders whose
+    revision changes with every Playwright release, so the path can't be
+    hard-coded. Picks the highest installed revision that has a
+    ``chrome.exe``; returns ``None`` if none is installed.
+    """
+    base = browsers_dir if browsers_dir is not None else _playwright_browsers_dir()
+    candidates = []
+    for exe in base.glob("chromium-*/chrome-win64/chrome.exe"):
+        revision = exe.parent.parent.name.removeprefix("chromium-")
+        if revision.isdigit():
+            candidates.append((int(revision), exe))
+    if not candidates:
+        return None
+    return max(candidates)[1]
 
 
 def _output(data: dict):
@@ -80,14 +102,23 @@ def start(headed=False, port=None):
     # Clean stale state
     _clear_state()
 
-    if not CHROMIUM_EXE.exists():
-        _output({"status": "error", "error": f"Chromium not found at {CHROMIUM_EXE}"})
+    chromium_exe = find_chromium_exe()
+    if chromium_exe is None:
+        _output(
+            {
+                "status": "error",
+                "error": (
+                    f"Playwright Chromium not found in {_playwright_browsers_dir()}. "
+                    "Run: python -m playwright install chromium"
+                ),
+            }
+        )
         return
 
     BROWSER_USER_DATA.mkdir(parents=True, exist_ok=True)
 
     args = [
-        str(CHROMIUM_EXE),
+        str(chromium_exe),
         f"--remote-debugging-port={port}",
         f"--user-data-dir={BROWSER_USER_DATA}",
         "--no-first-run",
